@@ -40,6 +40,7 @@ class Collection extends AbstractCollection
     {
         //$this->performAfterLoad('lof_chatsystem_category_store', 'category_id');
         // $this->getProductsAfterLoad();
+        
         return parent::_afterLoad();
     }
 

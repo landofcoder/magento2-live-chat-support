@@ -135,6 +135,19 @@
                     <item name="indexField" xsi:type="string">chat_id</item>
                 </item>
             </argument>
+            <action name="cleanlogs">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="type" xsi:type="string">cleanlogs</item>
+                        <item name="label" xsi:type="string" translate="true">Clean Message Logs</item>
+                        <item name="url" xsi:type="url" path="lofchatsystem/chat/massCleanlog"/>
+                        <item name="confirm" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Clean Messages of items</item>
+                            <item name="message" xsi:type="string" translate="true">Are you sure you wan't to clean messages of selected items?</item>
+                        </item>
+                    </item>
+                </argument>
+            </action>
             <action name="delete">
                 <argument name="data" xsi:type="array">
                     <item name="config" xsi:type="array">
@@ -201,6 +214,15 @@
                 </item>
             </argument>
         </column>
+        <column name="customer_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Customer ID</item>
+                </item>
+            </argument>
+        </column>
         <column name="customer_name">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -228,7 +250,16 @@
                 </item>
             </argument>
         </column>
-          <column name="user_name">
+        <column name="user_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Last chat user Id</item>
+                </item>
+            </argument>
+        </column>
+        <column name="user_name">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>

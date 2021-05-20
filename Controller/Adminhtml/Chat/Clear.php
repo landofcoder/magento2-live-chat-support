@@ -36,7 +36,7 @@ class Clear extends \Magento\Backend\App\Action
 
     protected $chatMessageFactory;
 
-    protected $date;
+    protected $_date;
 
     /**
      * @param Context $context
@@ -54,7 +54,7 @@ class Clear extends \Magento\Backend\App\Action
     ) {
         parent::__construct($context);
         $this->helper = $helper;
-        $this->date = $date;
+        $this->_date = $date;
         $this->resultPageFactory = $resultPageFactory;
         $this->chatMessageFactory = $chatMessageFactory;
     }
