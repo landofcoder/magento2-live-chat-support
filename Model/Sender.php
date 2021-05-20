@@ -66,13 +66,16 @@ class Sender
 
     protected $messageManager;
 
+    protected $userFactory;
+
     public function __construct(
         \Magento\Framework\Translate\Inline\StateInterface $inlineTranslation,
         \Lof\ChatSystem\Model\TransportBuilder $transportBuilder,
         \Magento\Framework\Mail\Template\TransportBuilder $_transportBuilder,
         \Lof\ChatSystem\Model\Config $config,
         \Magento\Framework\Message\ManagerInterface $messageManager,
-        \Lof\ChatSystem\Helper\Data $helper
+        \Lof\ChatSystem\Helper\Data $helper,
+        \Magento\User\Model\UserFactory $userFactory
 
     ) {
         $this->messageManager = $messageManager;
@@ -81,9 +84,8 @@ class Sender
         $this->_transportBuilder = $_transportBuilder;
         $this->transportBuilder = $transportBuilder;
         $this->helper           = $helper;
+        $this->userFactory      = $userFactory;
     }
-
-   
 
     public function sendEmailChat($data)
     {       
@@ -92,12 +94,17 @@ class Sender
             $postObject->setData($data);
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
             $admin_email = $this->helper->getConfig('email_settings/email_admin');
+            $default_admin_email = "";
+            if(isset($data["user_id"]) && $data["user_id"]){
+                $user = $this->userFactory->create()->load((int)$$data["user_id"]);
+                $default_admin_email = $user->getEmail();
+            }
             $transport = $this->_transportBuilder
             ->setTemplateIdentifier($this->helper->getConfig('email_settings/customer_chat_template'))
 
             ->setTemplateOptions(
                 [
-                 'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
+                'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
                 'store' => \Magento\Store\Model\Store::DEFAULT_STORE_ID,
             ])
             ->setTemplateVars(['data' => $postObject])
@@ -114,6 +121,32 @@ class Sender
                 $this->messageManager->addError(
                     __('We can\'t process your request right now. Sorry, that\'s all we know.')
                     );
+            }
+            //Send same email to default assigned admin user email.
+            if($default_admin_email){
+                $transport = $this->_transportBuilder
+                ->setTemplateIdentifier($this->helper->getConfig('email_settings/customer_chat_template'))
+
+                ->setTemplateOptions(
+                    [
+                    'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
+                    'store' => \Magento\Store\Model\Store::DEFAULT_STORE_ID,
+                ])
+                ->setTemplateVars(['data' => $postObject])
+                ->setFrom($this->helper->getConfig('email_settings/sender_email_identity'))
+                ->addTo($default_admin_email)
+                ->setReplyTo($default_admin_email)
+                ->getTransport();
+    
+                try  {
+                    $transport->sendMessage();
+                    $this->inlineTranslation->resume();
+                } catch(\Exception $e){
+                    $error = true;
+                    $this->messageManager->addError(
+                        __('We can\'t process your request right now. Sorry, that\'s all we know.')
+                        );
+                }
             }
         } catch (\Exception $e) {
             $this->inlineTranslation->resume();

@@ -203,15 +203,27 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
             $responseData = []; 
             $message = $this->_message;
             try{
+                $message
+                    ->setData($data)
+                    ->save();
+                $chat = $this->_chatModelFactory->create()->load($data['chat_id']);
+                $number_message = $chat->getData('number_message') + 1;
+
                 $enable_auto_assign_user = $this->_helper->getConfig('system/enable_auto_assign_user');
                 $admin_user_id = $this->_helper->getConfig('system/admin_user_id');
                 if($enable_auto_assign_user && $admin_user_id){
-                    
+                    $data["user_id"] = (int)$admin_user_id;
+                }else {
+                    $data["user_id"] = 0;
                 }
-                $message->setData($data)->save();
-                $chat = $this->_chatModelFactory->create()->load($data['chat_id']);
-                $number_message = $chat->getData('number_message') + 1;
-                $chat->setData('is_read',1)->setData('answered',1)->setData('status',1)->setData('number_message',$number_message)->setData('current_url',$data['current_url'])->save();
+                $chat
+                    ->setData('user_id', (int)$data["user_id"])
+                    ->setData('is_read',1)
+                    ->setData('answered',1)
+                    ->setData('status',1)
+                    ->setData('number_message',$number_message)
+                    ->setData('current_url',$data['current_url'])
+                    ->save();
                 $this->_cacheTypeList->cleanType('full_page');  
                 
                 if($this->_helper->getConfig('email_settings/enable_email')) {
