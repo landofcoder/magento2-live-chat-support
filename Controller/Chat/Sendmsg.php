@@ -120,11 +120,10 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         $data = $this->_request->getPostValue();
         $data['is_read'] =1;
         $data['current_time'] = $this->_helper->getCurrentTime();
-        //$data['current_url'] = $this->_helper->getCurrentUrl();
         
         if($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
             $customer_id = $this->_customerSession->getCustomerId();
-            if(!isset($data["customer_id"]) || ($data["customer_id"] != $customer_id)){
+            if(!isset($data["customer_id"]) || (empty($data["customer_id"]))){
                 $data["customer_id"] = (int)$customer_id;
             }
             if(!isset($data["customer_email"]) || ($data["customer_email"] != $customer_email)){
@@ -203,6 +202,7 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
             $responseData = []; 
             $message = $this->_message;
             try{
+                $data['chat_id'] = isset($data['chat_id'])?$data['chat_id']:null;
                 $message
                     ->setData($data)
                     ->save();
@@ -223,12 +223,16 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                     ->setData('status',1)
                     ->setData('number_message',$number_message)
                     ->setData('current_url',$data['current_url'])
+                    ->setData('ip', $this->_helper->getIp())
                     ->save();
                 $this->_cacheTypeList->cleanType('full_page');  
                 
                 if($this->_helper->getConfig('email_settings/enable_email')) {
-                    $data['url'] = $this->_helper->getUrl();
-                    $this->sender->sendEmailChat($data);
+                    $chatId = $chat->getId();
+                    if(!$data['chat_id'] || ($data['chat_id'] != $chatId)){ //only send email at first chat
+                        $data['url'] = $data['current_url'];
+                        $this->sender->sendEmailChat($data);
+                    }
                 }
             }catch(\Exception $e){
                 $this->messageManager->addError(

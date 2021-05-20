@@ -82,7 +82,7 @@ class Cleanlogs extends Command
             foreach ($collection as $key => $model) {
                 $model->delete();
             }
-            $output->writeln("The Chat Messages has been flushed. Clean %1 records", $totals);
+            $output->writeln("The Chat Messages has been flushed. Clean ".$totals." records");
         } catch (\Exception $e) {
             $output->writeln("Something went wrong in progressing.");
         }
@@ -93,7 +93,7 @@ class Cleanlogs extends Command
      */
     protected function configure()
     {
-        $this->setName("lof_chatsystem:cleanlogs");
+        $this->setName("lof_chatsystem:cleanchat");
         $this->setDescription("Clean Chat Message Logs");
         $this->setDefinition([
             new InputArgument(self::NAME_ARGUMENT, InputArgument::OPTIONAL, "Name"),

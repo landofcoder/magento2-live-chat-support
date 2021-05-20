@@ -37,15 +37,24 @@ class MassDelete extends \Magento\Backend\App\Action
      */
     protected $collectionFactory;
 
+    protected $chatMessageFactory;
+
     /**
      * @param Context $context
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
+     * @param \Lof\ChatSystem\Model\ChatMessageFactory $chatMessageFactory
      */
-    public function __construct(Context $context, Filter $filter, CollectionFactory $collectionFactory)
+    public function __construct(
+        Context $context,
+        Filter $filter, 
+        CollectionFactory $collectionFactory,
+        \Lof\ChatSystem\Model\ChatMessageFactory $chatMessageFactory
+        )
     {
         $this->filter = $filter;
         $this->collectionFactory = $collectionFactory;
+        $this->chatMessageFactory = $chatMessageFactory;
         parent::__construct($context);
     }
 
@@ -59,9 +68,16 @@ class MassDelete extends \Magento\Backend\App\Action
     {
         $collection = $this->filter->getCollection($this->collectionFactory->create());
         $collectionSize = $collection->getSize();
-
+        $chat_ids = [];
         foreach ($collection as $chat) {
+            $chat_ids[] = $chat->getId();
             $chat->delete();
+        }
+
+        $messageCollection = $this->chatMessageFactory->create()->getCollection();
+        $messageCollection->addFieldToFilter("chat_id", ["in" => $chat_ids]);
+        foreach ($messageCollection as $chatMessage) {
+            $chatMessage->delete();
         }
 
         $this->messageManager->addSuccess(__('A total of %1 record(s) have been deleted.', $collectionSize));

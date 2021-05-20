@@ -96,7 +96,7 @@ class Sender
             $admin_email = $this->helper->getConfig('email_settings/email_admin');
             $default_admin_email = "";
             if(isset($data["user_id"]) && $data["user_id"]){
-                $user = $this->userFactory->create()->load((int)$$data["user_id"]);
+                $user = $this->userFactory->create()->load((int)$data["user_id"]);
                 $default_admin_email = $user->getEmail();
             }
             $transport = $this->_transportBuilder
