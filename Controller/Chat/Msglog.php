@@ -64,6 +64,15 @@ class Msglog extends \Magento\Framework\App\Action\Action
     protected $_message;
 
     protected $chat;
+    protected $httpRequest;
+
+    /**
+     * @var \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress
+     */
+    protected $remoteAddress;
+
+    protected $blacklistFactory;
+
     /**
      * @param Context                                             $context              
      * @param \Magento\Store\Model\StoreManager                   $storeManager         
@@ -82,7 +91,10 @@ class Msglog extends \Magento\Framework\App\Action\Action
         \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList, 
-        \Magento\Customer\Model\Session $customerSession
+        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
+        \Magento\Framework\App\Request\Http $httpRequest,
+        \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
         ) {
         $this->chat                 = $chat;
         $this->resultPageFactory    = $resultPageFactory;
@@ -102,13 +114,39 @@ class Msglog extends \Magento\Framework\App\Action\Action
      * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
-    { 
-        $chat = $this->chat->load($this->_helper->getIp(),'ip');
-
+    {
+        $enable_blacklist = $this->_helper->getConfig('chat/enable_blacklist');
+        //check if enabled config blacklist, then check if ip in blacklist, then redirect it to home, else continue action
+        if ($enable_blacklist) {
+            $client_ip = $this->remoteAddress->getRemoteAddress();
+            $blacklist_model = $this->blacklistFactory->create(); 
+            if ($client_ip) {
+                $blacklist_model->loadByIp($client_ip);
+                if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
+                    print __('Your IP was blocked in our blacklist. So, you will not get any messages.');
+                    exit;
+                }
+            }
+            if($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
+                $customer_id = $this->_customerSession->getCustomerId();
+                $blacklist_model->loadByCustomerId((int)$customer_id);
+                if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
+                    print __('Your Account was blocked in our blacklist. So, you will not get any messages.');
+                    exit;
+                }
+                $blacklist_model2 = $this->blacklistFactory->create();
+                $blacklist_model2->loadByEmail($customer_email);
+                if ((0 < $blacklist_model2->getId()) && $blacklist_model2->getStatus()) {
+                    print __('Your Email Address was blocked in our blacklist. So, you will not get any messages.');
+                    exit;
+                }
+            }
+        }
         if($this->_customerSession->getCustomer()->getEmail()) {
             $message = $this->_message->getCollection()->addFieldToFilter('customer_email',$this->_customerSession->getCustomer()->getEmail());
         } else {
-           $message = $this->_message->getCollection()->addFieldToFilter('chat_id',$chat->getId()); 
+            $chat = $this->chat->load($this->_helper->getIp(),'ip');
+            $message = $this->_message->getCollection()->addFieldToFilter('chat_id',$chat->getId()); 
         }
         $count = count($message);
         $i=0;

@@ -69,6 +69,15 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
 
     protected $_chatModelFactory;
 
+    protected $httpRequest;
+
+    /**
+     * @var \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress
+     */
+    protected $remoteAddress;
+
+    protected $blacklistFactory;
+
     public function __construct(
         Context $context,
         \Magento\Store\Model\StoreManager $storeManager,
@@ -80,7 +89,10 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         \Magento\Framework\Registry $registry,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList, 
         \Magento\Customer\Model\Session $customerSession,
-        \Lof\ChatSystem\Model\ChatFactory $chatModelFactory
+        \Lof\ChatSystem\Model\ChatFactory $chatModelFactory,
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
+        \Magento\Framework\App\Request\Http $httpRequest,
+        \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
         ) {
         $this->sender = $sender;
         $this->resultPageFactory    = $resultPageFactory;
@@ -91,7 +103,10 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         $this->_cacheTypeList       = $cacheTypeList;
         $this->_customerSession     = $customerSession;
         $this->_request             = $context->getRequest();
-        $this->_chatModelFactory           = $chatModelFactory;
+        $this->_chatModelFactory    = $chatModelFactory;
+        $this->httpRequest          = $httpRequest;
+        $this->remoteAddress        = $remoteAddress;
+        $this->blacklistFactory     = $blacklistFactory;
         parent::__construct($context);
     }
 
@@ -106,10 +121,84 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         $data['is_read'] =1;
         $data['current_time'] = $this->_helper->getCurrentTime();
         //$data['current_url'] = $this->_helper->getCurrentUrl();
+        
+        if($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
+            $customer_id = $this->_customerSession->getCustomerId();
+            if(!isset($data["customer_id"]) || ($data["customer_id"] != $customer_id)){
+                $data["customer_id"] = (int)$customer_id;
+            }
+            if(!isset($data["customer_email"]) || ($data["customer_email"] != $customer_email)){
+                $data["customer_email"] = $customer_email;
+            }
+            if(!isset($data["customer_name"]) || (empty($data["customer_name"]))){
+                $data["customer_name"] =  $this->_customerSession->getCustomer()->getData("firstname").' '. $this->_customerSession->getCustomer()->getData("lastname");
+            }
+        }
         if(empty($data['customer_name'])) {
             $data['customer_name'] = __('Guest');
         }
         $data = $this->_helper->xss_clean_array($data);
+        $enable_blacklist = $this->_helper->getConfig('chat/enable_blacklist');
+        //check if enabled config blacklist, then check if ip in blacklist, then redirect it to home, else continue action
+        if ($enable_blacklist) {
+            $client_ip = $this->remoteAddress->getRemoteAddress();
+            $blacklist_model = $this->blacklistFactory->create();
+            if ($client_ip) {
+                $blacklist_model->loadByIp($client_ip);
+                if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
+
+                    $responseData = [];
+                    $responseData['message'] =
+                        __('Your IP was blocked in our blacklist. So, we will not allow chat.');
+                    $responseData['status'] = false;
+                    $this->messageManager->addError(
+                        __('Your IP was blocked in our blacklist. So, we will not allow chat.')
+                    );
+                    $this->getResponse()->representJson(
+                        $this->_objectManager->get('Magento\Framework\Json\Helper\Data')->jsonEncode($responseData)
+                    );
+                    return ;
+                }
+                if($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
+                    $customer_id = $this->_customerSession->getCustomerId();
+                    if(!isset($data["customer_id"]) || ($data["customer_id"] != $customer_id)){
+                        $data["customer_id"] = (int)$customer_id;
+                    }
+                    if(!isset($data["customer_email"]) || ($data["customer_email"] != $customer_email)){
+                        $data["customer_email"] = $customer_email;
+                    }
+                    $blacklist_model->loadByCustomerId((int)$customer_id);
+                    if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
+                        $responseData = [];
+                        $responseData['message'] =
+                            __('Your Account was blocked in our blacklist. So, we will not allow chat.');
+                        $responseData['status'] = false;
+                        $this->messageManager->addError(
+                            __('Your Account was blocked in our blacklist. So, we will not allow chat.')
+                        );
+                        $this->getResponse()->representJson(
+                            $this->_objectManager->get('Magento\Framework\Json\Helper\Data')->jsonEncode($responseData)
+                        );
+                        return ;
+                    }
+                    $blacklist_model2 = $this->blacklistFactory->create();
+                    $blacklist_model2->loadByEmail($customer_email);
+                    if ((0 < $blacklist_model2->getId()) && $blacklist_model2->getStatus()) {
+                        $responseData = [];
+                        $responseData['message'] =
+                            __('Your Email Address was blocked in our blacklist. So, we will not allow chat.');
+                        $responseData['status'] = false;
+                        $this->messageManager->addError(
+                            __('Your sEmail Address was blocked in our blacklist. So, we will not allow chat.')
+                        );
+                        $this->getResponse()->representJson(
+                            $this->_objectManager->get('Magento\Framework\Json\Helper\Data')->jsonEncode($responseData)
+                        );
+                        return ;
+                    }
+                }
+            }
+        }
         if(!empty($data) && !empty($data['body_msg'])){
             $responseData = []; 
             $message = $this->_message;

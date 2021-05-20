@@ -49,23 +49,23 @@ class InstallSchema implements InstallSchemaInterface
             ['unsigned' => false, 'nullable' => true],
             'Customer Id'
         )->addColumn(
-        'customer_email',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'Customer Email'
-        )->addColumn(
-        'customer_name',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'Customer Name'
-        )->addColumn(
-        'user_name',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'User Name'
+            'customer_email',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Customer Email'
+            )->addColumn(
+            'customer_name',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Customer Name'
+            )->addColumn(
+            'user_name',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'User Name'
         )->addColumn(
             'is_read',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -126,18 +126,18 @@ class InstallSchema implements InstallSchemaInterface
             ['unsigned' => false, 'nullable' => true],
             'Customer Id'
         )->addColumn(
-        'customer_email',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'Customer Email'
-        )->addColumn(
-        'customer_name',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'Customer Name'
-        )
+            'customer_email',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Customer Email'
+            )->addColumn(
+            'customer_name',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Customer Name'
+            )
         ->addColumn(
             'is_read',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -146,17 +146,17 @@ class InstallSchema implements InstallSchemaInterface
             'Is Read'
         )
         ->addColumn(
-        'user_name',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'User Name'
-        )->addColumn(
-        'name',
-        \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-        255,
-        ['nullable' => false],
-        'Name'
+            'user_name',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'User Name'
+            )->addColumn(
+            'name',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Name'
         )->addColumn(
             'body_msg',
             \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
