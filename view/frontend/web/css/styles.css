@@ -628,6 +628,7 @@
 
 #live-chat form {
     padding: 24px;
+    padding-left: 10px;
 }
 
 #live-chat input[type="text"] {

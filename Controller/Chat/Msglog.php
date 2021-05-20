@@ -105,6 +105,8 @@ class Msglog extends \Magento\Framework\App\Action\Action
         $this->_cacheTypeList       = $cacheTypeList;
         $this->_customerSession     = $customerSession;
         $this->_request             = $context->getRequest();
+        $this->remoteAddress        = $remoteAddress;
+        $this->blacklistFactory     = $blacklistFactory;
         parent::__construct($context);
     }
 
@@ -152,7 +154,10 @@ class Msglog extends \Magento\Framework\App\Action\Action
         $i=0;
         $auto_user_name = $this->_helper->getConfig('chat/auto_user_name');
         $auto_message = $this->_helper->getConfig('chat/auto_message');
+        $welcome_message = $this->_helper->getConfig('chat/welcome_message');
+        $auto_user_name = $auto_user_name?$auto_user_name:__("Bot");
         $auto_message = trim($auto_message);
+        $welcome_message = trim($welcome_message);
         $count_found_user_replied = 0;
         foreach ($message as $key => $_message) {
             $i++;
@@ -189,10 +194,18 @@ class Msglog extends \Magento\Framework\App\Action\Action
 
             }
         }
-        if(!$count_found_user_replied && $auto_message){
-            $auto_user_name = $auto_user_name?$auto_user_name:__("Bot");
+        if($count){
+            if(!$count_found_user_replied && $auto_message){
+                print '<div class="msg">
+                        <p>'.$auto_message.'</p>
+                        <div class="info-msg">
+                            '.$auto_user_name.'
+                        </div>
+                    </div>';
+            }
+        }elseif($welcome_message) {
             print '<div class="msg">
-                    <p>'.$auto_message.'</p>
+                    <p>'.$welcome_message.'</p>
                     <div class="info-msg">
                         '.$auto_user_name.'
                     </div>

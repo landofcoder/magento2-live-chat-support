@@ -62,10 +62,13 @@
                     <label>Store</label>
                     <source_model>Magento\Config\Model\Config\Source\Store</source_model>
                 </field>
-                <field id="auto_message" translate="label" type="textarea" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="welcome_message" translate="label" type="textarea" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Welcome Message show on first chat</label>
+                </field>
+                <field id="auto_message" translate="label" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Automatic Message show on first chat</label>
                 </field>
-                <field id="auto_user_name" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="auto_user_name" translate="label" type="text" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Automatic User Name</label>
                 </field>
              </group>

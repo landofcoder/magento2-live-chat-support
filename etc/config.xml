@@ -31,6 +31,7 @@
 				<text_label>Chat With Us</text_label>
 				<background_color>#293239</background_color>
 				<enable_blacklist>1</enable_blacklist>
+				<welcome_message>Welcome to our site, if you need help simply reply to this message, we are online and ready to help.</welcome_message>
 				<auto_message/>
 				<auto_user_name>Bot</auto_user_name>
 			</chat>
