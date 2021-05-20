@@ -25,7 +25,25 @@
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="lofchatsystem_chat_listing_data_source" xsi:type="string">Lof\ChatSystem\Model\ResourceModel\Chat\Grid\Collection</item>
+                <item name="lofchatsystem_blacklist_listing_data_source" xsi:type="string">Lof\ChatSystem\Model\ResourceModel\Blacklist\Grid\Collection</item>
             </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\Console\CommandList">
+		<arguments>
+			<argument name="commands" xsi:type="array">
+				<item name="Cleancache" xsi:type="object">Lof\ChatSystem\Console\Command\Cleanlogs</item>
+			</argument>
+		</arguments>
+	</type>
+
+    <type name="Lof\ChatSystem\Model\ResourceModel\Blacklist\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">lof_chatsystem_blacklist</argument>
+            <argument name="eventPrefix" xsi:type="string">lofchatsystem_blacklist_grid_collection</argument>
+            <argument name="eventObject" xsi:type="string">blacklist_grid_collection</argument>
+            <argument name="resourceModel" xsi:type="string">Lof\ChatSystem\Model\ResourceModel\Blacklist</argument>
         </arguments>
     </type>
 

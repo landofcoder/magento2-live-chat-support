@@ -32,16 +32,31 @@ class Clear extends \Magento\Backend\App\Action
      */
     protected $resultPageFactory;
 
+    protected $helper;
+
+    protected $chatMessageFactory;
+
+    protected $date;
+
     /**
      * @param Context $context
      * @param PageFactory $resultPageFactory
+     * @param \Lof\ChatSystem\Helper\Data $helper
+     * @param \Lof\ChatSystem\Model\ChatMessageFactory $chatMessageFactory
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      */
     public function __construct(
         Context $context,
-        PageFactory $resultPageFactory
+        PageFactory $resultPageFactory,
+        \Lof\ChatSystem\Helper\Data $helper,
+        \Lof\ChatSystem\Model\ChatMessageFactory $chatMessageFactory,
+        \Magento\Framework\Stdlib\DateTime\DateTime $date
     ) {
         parent::__construct($context);
+        $this->helper = $helper;
+        $this->date = $date;
         $this->resultPageFactory = $resultPageFactory;
+        $this->chatMessageFactory = $chatMessageFactory;
     }
     /**
      * Check the permission to run it
@@ -64,12 +79,21 @@ class Clear extends \Magento\Backend\App\Action
         $resultRedirect = $this->resultRedirectFactory->create();   
         try {
             // init model and delete
-            $collection = $this->_objectManager->create('Lof\ChatSystem\Model\ChatMessage')->getCollection();
+            $collection = $this->chatMessageFactory->create()->getCollection();
+            $clean_older_day = $this->helper->getConfig("system/clean_older_day");
+            if($clean_older_day){
+                $current_date = $this->_date->gmtDate();
+                $currentDateTime = strtotime($current_date);
+                $clean_older_day = '- '.(int)$clean_older_day.' days';//2021-05-20 04:35:35
+                $olderDate = date('Y-m-d H:i:s',strtotime($clean_older_day, $currentDateTime));
+                $collection->addFieldToFilter('created_at', ['lteq' => $olderDate]);
+            }
+            $totals = $collection->count();
             foreach ($collection as $key => $model) {
                 $model->delete();
              }
             // display success message
-            $this->messageManager->addSuccess(__('You clear the message chat.'));
+            $this->messageManager->addSuccess(__('You clear the message chat. Clean %1 records', $totals));
             // go to grid
             return $resultRedirect->setPath('*/*/');
         } catch (\Exception $e) {

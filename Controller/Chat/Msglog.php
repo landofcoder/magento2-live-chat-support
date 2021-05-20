@@ -150,7 +150,10 @@ class Msglog extends \Magento\Framework\App\Action\Action
         }
         $count = count($message);
         $i=0;
-        
+        $auto_user_name = $this->_helper->getConfig('chat/auto_user_name');
+        $auto_message = $this->_helper->getConfig('chat/auto_message');
+        $auto_message = trim($auto_message);
+        $count_found_user_replied = 0;
         foreach ($message as $key => $_message) {
             $i++;
             $date_sent = $_message['created_at'];
@@ -177,6 +180,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
                         '.$_message['user_name'].'
                     </div>
                 </div>';
+                $count_found_user_replied++;
                 if($count == $i) {
                     echo "
                     <script>require(['jquery'],function($) { $('.chat-message-counter').css('display','inline'); });</script>
@@ -184,6 +188,15 @@ class Msglog extends \Magento\Framework\App\Action\Action
                 }
 
             }
+        }
+        if(!$count_found_user_replied && $auto_message){
+            $auto_user_name = $auto_user_name?$auto_user_name:__("Bot");
+            print '<div class="msg">
+                    <p>'.$auto_message.'</p>
+                    <div class="info-msg">
+                        '.$auto_user_name.'
+                    </div>
+                </div>';
         }
         exit;
     }

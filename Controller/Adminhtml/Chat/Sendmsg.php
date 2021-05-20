@@ -67,6 +67,8 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
 
     protected $_chatModelFactory;
 
+    protected $authSession;
+
     public function __construct(
         Context $context,
         \Magento\Store\Model\StoreManager $storeManager,
@@ -78,7 +80,8 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         \Lof\ChatSystem\Model\Sender $sender,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList, 
         \Magento\Customer\Model\Session $customerSession,
-        \Lof\ChatSystem\Model\ChatFactory $chatModelFactory
+        \Lof\ChatSystem\Model\ChatFactory $chatModelFactory,
+        \Magento\Backend\Model\Auth\Session $authSession
         ) {
         $this->resultPageFactory    = $resultPageFactory;
         $this->_helper              = $helper;
@@ -90,6 +93,7 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         $this->_request             = $context->getRequest();
         $this->sender = $sender;
         $this->_chatModelFactory = $chatModelFactory;
+        $this->authSession  = $authSession;
         parent::__construct($context);
     }
 
@@ -108,10 +112,24 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
             $message = $this->_message;
            
             try{
+                $user_id = $this->getUser()->getData('user_id');
+                $user_name = $this->getUser()->getData('firstname').' '.$this->getUser()->getData('lastname');
+                if(!isset($data['user_name']) || ($data['user_name'] != $user_name)){
+                    $data['user_name'] = $user_name;
+                }
+                if(!isset($data['user_id']) || ($data['user_id'] != $user_id)){
+                    $data['user_id'] = $user_id;
+                }
                 $message->setData($data)->save();
                 $chat = $this->_chatModelFactory->create()->load($data['chat_id']);
                 $number_message = $chat->getData('number_message') + 1;
-                $chat->setUserName($data['user_name'])->setData('is_read',3)->setData('answered',0)->setData('number_message',$number_message)->save();
+                $chat
+                    ->setUserName($data['user_name'])
+                    ->setData("user_id", (int)$data['user_id'])
+                    ->setData('is_read',3)
+                    ->setData('answered',0)
+                    ->setData('number_message',$number_message)
+                    ->save();
                 $this->_cacheTypeList->cleanType('full_page'); 
                 if($data['customer_name'] && $this->_helper->getConfig('email_settings/enable_email')) {
                     $data['url'] = $this->_helper->getUrl();
@@ -124,5 +142,9 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                 return;
             }
         }
+    }
+    protected function getUser() {
+        $user = $this->authSession->getUser();
+        return $user;
     }
 }

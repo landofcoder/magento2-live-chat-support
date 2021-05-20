@@ -22,7 +22,7 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
-         <job name="lof_chatsystem_cron" instance="Lof\ChatSystem\Model\Cron" method="execute">
+        <job name="lof_chatsystem_cron" instance="Lof\ChatSystem\Model\Cron" method="execute">
             <schedule>0 1 * * *</schedule>
         </job>
     </group>

@@ -203,6 +203,11 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
             $responseData = []; 
             $message = $this->_message;
             try{
+                $enable_auto_assign_user = $this->_helper->getConfig('system/enable_auto_assign_user');
+                $admin_user_id = $this->_helper->getConfig('system/admin_user_id');
+                if($enable_auto_assign_user && $admin_user_id){
+                    
+                }
                 $message->setData($data)->save();
                 $chat = $this->_chatModelFactory->create()->load($data['chat_id']);
                 $number_message = $chat->getData('number_message') + 1;
