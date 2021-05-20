@@ -1,0 +1,236 @@
+<?php
+$helper = $this->helper("Lof\ChatSystem\Helper\Data");
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customer = $objectManager->get('\Magento\Customer\Model\Session');
+$title                   = $this->getData('title');
+$title_color             = $this->getData('title_color');
+$show_text_before        = $this->getData('show_text_before');
+$show_text_after         = $this->getData('show_text_after');
+$prefix_class            = $this->getData('prefix_class');
+$button_text      		 = $this->getData('button_text');
+$submit_button_text      = $this->getData('submit_button_text');
+$submit_text_color       = $this->getData('submit_text_color');
+$submit_background_color = $this->getData('submit_background_color');
+$display_type            = $this->getData('display_type');
+$position                = $this->getData('position');
+if(!$position) {
+	$position                = $this->getData('position_popup');	
+}
+$category  				 = $this->getData('category');
+$status 				 = $this->getData('status');
+$priority 				 = $this->getData('priority');
+
+$popup_width = 500;
+$popup_height = 600;
+if(!$priority) {
+ $priority = 0;
+}
+$before_form_content     = $helper->filter($this->getData('before_form_content'));
+$after_form_content      = $helper->filter($this->getData('after_form_content'));
+$modId                   = time() . rand();
+$width = 600;
+$style                   = '';
+if($width && $display_type =='tab_animation'){
+	$style .= 'width: ' . $width . 'px;';
+	if($position == 'right'){
+		$style .= 'right: -' . ($width*2) . 'px';
+	} else {
+		$style .= 'left: -' . ($width*2) . 'px';
+	}
+}
+
+if($style!='') $style = 'style="' . $style . '"';
+
+$url = $helper->getStoreUrl(); 
+?>
+
+
+<div id="lofform<?php echo $modId ?>" class="chatsystem-form <?php if($display_type == 'tab_animation') { echo 'animation animation-' . $position; }?>  <?php echo $prefix_class ?>"  <?php echo $style ?> >
+	<?php if($display_type == 'tab_animation' || $display_type == 'tab_popup') { ?>
+	<div class="chatsystem_button <?php if($display_type != 'button_popup') echo 'panelbutton ';  ?> <?php if($display_type == 'tab_popup')  echo 'tab_popup '.$position;  ?>">
+		<span><?php if($button_text) {
+			echo $button_text;
+		} else {
+			echo "Contact Us";
+		} ?></span>
+	</div>
+	<?php } elseif ($display_type == 'button_popup') { ?>
+	<button class="chatsystem_button tab_popup <?php  echo $position;  ?>">
+		<span><?php if($button_text) {
+			echo $button_text;
+		} else {
+			echo "Contact Us";
+		} ?></span>
+	</button>
+	<?php } ?>
+	<div class="form-content" style="<?php if($display_type == 'tab_popup' || $display_type == 'button_popup') echo 'display:none;'; ?>">
+	<?php if($title) { ?>
+		<h2 class="text-center" <?php if($title_color){ ?>style="color: <?php echo $title_color ?>"<?php }?>><?php echo $title ?></h2>
+	<?php } ?>
+	<?php if($show_text_before && ($before_form_content!='')){ ?>
+		<div class="before-form-content">
+			<?php echo $before_form_content; ?>
+		</div>
+	<?php } ?>	
+		<form id="chatsystem<?php echo $modId ?>" class="chatsystem form" action="<?php echo $block->getFormAction(); ?>" id="chatsystem-form<?php echo $modId ?>" method="post" data-hasrequired="<?php echo __('* Required Fields') ?>" data-mage-init='{"validation":{}}' enctype="multipart/form-data">
+			<div class="form-list row">
+				<div class="field col-sm-12 ">
+					<div class="response-field-text">
+						<div class="subtemplate-wrapper" style="">
+							<label for="subject" class="required">
+								<?php echo __('Subject'); ?><em>*</em>
+							</label>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="subtemplate-inner">
+										<input style="" name="subject" id="subject" title="Subject" class="input-text required-entry " type="text">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="field col-sm-12 ">
+					<div class="response-field-text">
+						<div class="subtemplate-wrapper">
+							<label for="description" class="required">
+								<?php echo __('Description'); ?><em>*</em>
+							</label>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="subtemplate-inner">
+										<textarea name="description" id="description" title="Description"  class="input-text required-entry " ></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<?php if($helper->isLoggedIn() == false) { ?>
+				<div class="field col-sm-6 ">
+					<div class="response-field-text">
+						<div class="subtemplate-wrapper">
+							<label for="name" class="required">
+								<?php echo __('Name'); ?><em>*</em>
+							</label>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="subtemplate-inner">
+										<input name="name" id="name" title="Name"  class="input-text required-entry " type="text" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="field col-sm-6">
+					<div class="response-field-text">
+						<div class="subtemplate-wrapper">
+							<label for="email" class="required">
+								<?php echo __('Email'); ?><em>*</em>
+							</label>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="subtemplate-inner">
+										<input name="email" id="email" title="Email"  class="input-text required-entry validate-email" type="text" >
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<?php } else { ?>
+				<input name="name" id="name" title="Name"  class="input-text" type="hidden" value="<?php echo $helper->getCustomerName(); ?>" />
+				<input name="email" id="email" title="Email"  class="input-text" type="hidden" value="<?php echo $helper->getCustomerEmail();?>">
+				<?php } ?>
+				<input name="category_id" id="category_id" title="Category"  class="input-text" type="hidden" value="<?php echo $category; ?>" />
+				<input name="status" id="status" title="Status"  class="input-text" type="hidden" value="<?php echo $status; ?>" />
+				<input name="priority" id="priority" title="Priority"  class="input-text" type="hidden" value="<?php echo $priority; ?>" />
+				<input name="url" id="url" title="Url"  class="input-text" type="hidden" value="<?php echo $url; ?>" />
+			</div>
+			<div class="row">
+				<div class="buttons-set col-sm-12">
+					<button type="submit" title="<?php echo __('Submit') ?>" style="<?php echo isset($submit_text_color)?'color:'.$submit_text_color.';':' '; ?><?php echo isset($submit_background_color)?'background-color:'.$submit_background_color.';':' '; ?> " class="chatsystem-button button"><span><span>
+					<?php if($submit_button_text) { ?>
+					<?php echo $submit_button_text; ?>
+					<?php } else { ?>
+					<?php echo __('Submit') ?>
+					<?php } ?>
+					</span></span></button>
+				</div>
+			</div>
+		</form>
+		<?php if($show_text_after && ($after_form_content!='')){ ?>
+		<div class="before-form-content">
+			<?php echo $after_form_content; ?>
+		</div>
+		<?php } ?>
+	</div>
+</div>
+<script type="text/javascript">
+require([
+	'jquery',
+	<?php if($display_type == 'tab_popup' || $display_type == 'button_popup'){ ?>
+		'Lof_All/lib/fancybox/jquery.fancybox.pack',<?php } ?>
+	'mage/validation'
+	], function($){
+		jQuery(document).ready(function($) {
+			<?php if($width && ($display_type =='tab_animation')){ ?>
+				var blockWidth = $('#lofform<?php echo $modId ?>').outerWidth();
+				<?php if($position == 'left'){ ?>
+					$('#lofform<?php echo $modId ?>').css({'left':'-' + blockWidth + 'px'});
+				<?php } ?>
+				<?php if($position == 'right'){ ?>
+					$('#lofform<?php echo $modId ?>').css({'right':'-' + (blockWidth+2) + 'px'});
+				<?php } ?>
+			<?php } ?>
+			<?php if($display_type == 'tab_popup' || $display_type == 'button_popup'){ ?>
+			jQuery(".chatsystem_button").fancybox({
+				'href'   : '#chatsystem<?php echo $modId ?>',
+				'titleShow'  : false,
+				'transitionIn'  : 'elastic',
+				'transitionOut' : 'elastic',
+				<?php if((int)$popup_width>0){ ?>'maxWidth': '<?php echo $popup_width ?>',<?php } ?>
+				<?php if((int)$popup_height>0){ ?>'maxHeight': '<?php echo $popup_height ?>',<?php } ?>
+			});
+			<?php } ?>
+			<?php if($width && $display_type =='tab_animation'){ ?>
+
+			jQuery("#lofform<?php echo $modId ?> .panelbutton").click( function(){
+					jQuery(this).parent().toggleClass("active");
+			} );
+
+			var orgFormWidth = $('#lofform<?php echo $modId ?>').outerWidth();
+			var orgRight = (blockWidth+2);
+			$(window).on("resize", function(){
+				var formHeight = $('#lofform<?php echo $modId ?>').height();
+				var newFormWidth = $('#lofform<?php echo $modId ?>').outerWidth();
+				var formP = $('#lofform<?php echo $modId ?>').position().top;
+				if($(window).height() < (formHeight + formP)){
+					$('#lofform<?php echo $modId ?> .form-content').css({'overflow': 'scroll','height':'100%'});
+					$('#lofform<?php echo $modId ?>').css({'height':($(window).height()-formP-10)+'px'});
+				} else {
+					$('#lofform<?php echo $modId ?> .form-content').css({'overflow': ''});
+					$('#lofform<?php echo $modId ?>').css({'height':''});
+				}
+				if($(window).width() < newFormWidth){
+					<?php if($position == 'right'){ ?>
+					$('#lofform<?php echo $modId ?>').css({'width':($(window).width()-50)+'px','right':'-'+newFormWidth+'px'});
+					<?php } ?>
+					<?php if($position == 'left'){ ?>
+					$('#lofform<?php echo $modId ?>').css({'width':($(window).width()-50)+'px','left':'-'+newFormWidth+'px'});
+					<?php } ?>
+				}else{
+					<?php if($position == 'right'){ ?>
+					$('#lofform<?php echo $modId ?>').css({'width':orgFormWidth+'px','right':'-'+blockWidth+'px'});
+					<?php } ?>
+					<?php if($position == 'left'){ ?>
+					$('#lofform<?php echo $modId ?>').css({'width':orgFormWidth+'px','left':'-'+blockWidth+'px'});			
+					<?php } ?>
+				}
+
+			}).resize();
+			<?php } ?>
+		});
+	});	
+</script>
