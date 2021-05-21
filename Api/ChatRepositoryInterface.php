@@ -58,5 +58,34 @@ interface ChatRepositoryInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function deleteById($chatId);
+
+    /**
+     * Admin user send message
+     * @param \Lof\ChatSystem\Api\Data\MessageInterface $message
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function sendAdminChatMessage(\Lof\ChatSystem\Api\Data\MessageInterface $message);
+
+    /**
+     * get customer message
+     * @param int $customerId
+     * @return \Lof\ChatSystem\Api\Data\MessageSearchResultsInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getMyChat($customerId);
+
+    /**
+     * Customer send message
+     * @param int $customerId
+     * @param \Lof\ChatSystem\Api\Data\MessageInterface $message
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function sendCustomerChatMessage($customerId, \Lof\ChatSystem\Api\Data\MessageInterface $message);
+
 }
 

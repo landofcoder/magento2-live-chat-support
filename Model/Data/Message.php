@@ -278,5 +278,24 @@ class Message extends \Magento\Framework\Api\AbstractExtensibleObject implements
     {
         return $this->setData(self::UPDATED_AT, $updatedAt);
     }
+
+    /**
+     * Get ip
+     * @return string|null
+     */
+    public function getIp()
+    {
+        return $this->_get(self::IP);
+    }
+
+    /**
+     * Set ip
+     * @param string $ip
+     * @return \Lof\ChatSystem\Api\Data\ChatInterface
+     */
+    public function setIp($ip)
+    {
+        return $this->setData(self::IP, $ip);
+    }
 }
 

@@ -23,6 +23,8 @@ interface MessageInterface extends \Magento\Framework\Api\ExtensibleDataInterfac
     const NAME = 'name';
     const USER_ID = 'user_id';
     const UPDATED_AT = 'updated_at';
+    const IP = 'ip';
+
 
     /**
      * Get message_id
@@ -207,5 +209,18 @@ interface MessageInterface extends \Magento\Framework\Api\ExtensibleDataInterfac
      * @return \Lof\ChatSystem\Api\Data\MessageInterface
      */
     public function setUpdatedAt($updatedAt);
+
+    /**
+     * Get ip
+     * @return string|null
+     */
+    public function getIp();
+
+    /**
+     * Set ip
+     * @param string $ip
+     * @return \Lof\ChatSystem\Api\Data\ChatInterface
+     */
+    public function setIp($ip);
 }
 
