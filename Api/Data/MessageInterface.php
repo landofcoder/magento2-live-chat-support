@@ -24,6 +24,7 @@ interface MessageInterface extends \Magento\Framework\Api\ExtensibleDataInterfac
     const USER_ID = 'user_id';
     const UPDATED_AT = 'updated_at';
     const IP = 'ip';
+    const CURRENT_URL = 'current_url';
 
 
     /**
@@ -222,5 +223,18 @@ interface MessageInterface extends \Magento\Framework\Api\ExtensibleDataInterfac
      * @return \Lof\ChatSystem\Api\Data\ChatInterface
      */
     public function setIp($ip);
+
+    /**
+     * Get current_url
+     * @return string|null
+     */
+    public function getCurrentUrl();
+
+    /**
+     * Set current_url
+     * @param string $currentUrl
+     * @return \Lof\ChatSystem\Api\Data\ChatInterface
+     */
+    public function setCurrentUrl($currentUrl);
 }
 

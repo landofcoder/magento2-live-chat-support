@@ -267,19 +267,27 @@ class ChatRepository implements ChatRepositoryInterface
                     ));
                 }
             }
-            $blacklist_model->loadByCustomerId((int)$customer_id);
+            $blacklist_model->loadByCustomerId((int)$customerId);
             if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
                 throw new CouldNotDeleteException(__(
                     'Your Account was blocked in our blacklist. So, you will not get any messages.'
                 ));
             }
         }
+        $chatModel = $this->chatFactory->create()->getCollection()
+                            ->addFieldToFilter('customer_id',$customerId)
+                            ->addFieldToFilter('status', 1)
+                            ->getFirstItem();
         $searchResults = $this->searchMessageResultsFactory->create();
         $collection = $this->messageFactory->create()->getCollection()->addFieldToFilter('customer_id',$customerId);
 
         $items = [];
         foreach ($collection as $model) {
-            $items[] = $model->getDataModel();
+            $messageModel = $model->getDataModel();
+            $messageModel->setCurrentUrl($chatModel->getCurrentUrl());
+            $messageModel->setIp($chatModel->getIp());
+            
+            $items[] = $messageModel;
         }
         
         $searchResults->setItems($items);
@@ -297,7 +305,7 @@ class ChatRepository implements ChatRepositoryInterface
             ));
         }
         if(!$message->getCustomerId()) {
-            $message->setCustomerId((int)$customer_id);
+            $message->setCustomerId((int)$customerId);
         }
         $enable_blacklist = $this->_helper->getConfig('chat/enable_blacklist');
         if ($enable_blacklist) {
@@ -311,7 +319,7 @@ class ChatRepository implements ChatRepositoryInterface
                     ));
                 }
             }
-            $blacklist_model->loadByCustomerId((int)$customer_id);
+            $blacklist_model->loadByCustomerId((int)$customerId);
             if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
                 throw new CouldNotDeleteException(__(
                     'Your Account was blocked in our blacklist. So, you will not get any messages.'

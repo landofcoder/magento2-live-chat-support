@@ -297,5 +297,24 @@ class Message extends \Magento\Framework\Api\AbstractExtensibleObject implements
     {
         return $this->setData(self::IP, $ip);
     }
+
+    /**
+     * Get current_url
+     * @return string|null
+     */
+    public function getCurrentUrl()
+    {
+        return $this->_get(self::CURRENT_URL);
+    }
+
+    /**
+     * Set current_url
+     * @param string $currentUrl
+     * @return \Lof\ChatSystem\Api\Data\ChatInterface
+     */
+    public function setCurrentUrl($currentUrl)
+    {
+        return $this->setData(self::CURRENT_URL, $currentUrl);
+    }
 }
 
