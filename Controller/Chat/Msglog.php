@@ -159,6 +159,12 @@ class Msglog extends \Magento\Framework\App\Action\Action
         $auto_message = trim($auto_message);
         $welcome_message = trim($welcome_message);
         $count_found_user_replied = 0;
+        foreach ($message as $_message1) {
+            if($_message1["user_id"]){
+                $count_found_user_replied++;
+                break;
+            }
+        }
         foreach ($message as $key => $_message) {
             $i++;
             $date_sent = $_message['created_at'];
@@ -168,6 +174,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
             $hour_sent = substr($date_sent, 11, 2); 
             $min_sent = substr($date_sent, 14, 2); 
             $body_msg = $this->_helper->xss_clean($_message['body_msg']);
+            
             if (!$_message['user_id'])
             {
                 print '<div class="msg-user">
@@ -185,7 +192,6 @@ class Msglog extends \Magento\Framework\App\Action\Action
                         '.$_message['user_name'].'
                     </div>
                 </div>';
-                $count_found_user_replied++;
                 if($count == $i) {
                     echo "
                     <script>require(['jquery'],function($) { $('.chat-message-counter').css('display','inline'); });</script>
@@ -193,17 +199,17 @@ class Msglog extends \Magento\Framework\App\Action\Action
                 }
 
             }
-        }
-        if($count){
-            if(!$count_found_user_replied && $auto_message){
+
+            if($i == 1 && !$count_found_user_replied && $auto_message){
                 print '<div class="msg">
-                        <p>'.$auto_message.'</p>
-                        <div class="info-msg">
-                            '.$auto_user_name.'
-                        </div>
-                    </div>';
+                    <p>'.$auto_message.'</p>
+                    <div class="info-msg">
+                        '.$auto_user_name.'
+                    </div>
+                </div>';
             }
-        }elseif($welcome_message) {
+        }
+        if(!$count && $welcome_message) {
             print '<div class="msg">
                     <p>'.$welcome_message.'</p>
                     <div class="info-msg">
