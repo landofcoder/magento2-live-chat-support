@@ -37,7 +37,7 @@ class Blacklist extends \Magento\Framework\Model\AbstractModel
     public function __construct(
         \Magento\Framework\Model\Context $context,
         \Magento\Framework\Registry $registry,
-        \Lof\Formbuilder\Model\ResourceModel\Blacklist $resource = null,
+        \Lof\ChatSystem\Model\ResourceModel\Blacklist $resource = null,
         \Lof\ChatSystem\Model\ResourceModel\Blacklist\Collection $resourceCollection = null,
         array $data = []
     ) {

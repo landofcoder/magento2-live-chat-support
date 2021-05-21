@@ -51,25 +51,35 @@ abstract class Blacklist extends \Magento\Backend\App\Action
      */
     protected $collectionFactory;
 
+    protected $blacklistFactory;
+
+    protected $helper;
+
     /**
      * @param \Magento\Backend\App\Action\Context              $context             
      * @param \Magento\Framework\Registry                      $coreRegistry
      * @param PageFactory $resultPageFactory 
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
-
+     * @param \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
+     * @param \Lof\ChatSystem\Helper\Data $helperData
+     *
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Registry $coreRegistry,
         PageFactory $resultPageFactory,
         Filter $filter, 
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory,
+        \Lof\ChatSystem\Helper\Data $helperData
         ) {
         $this->_coreRegistry = $coreRegistry;
         $this->resultPageFactory = $resultPageFactory;
         $this->filter = $filter;
         $this->collectionFactory = $collectionFactory;
+        $this->blacklistFactory = $blacklistFactory;
+        $this->helper = $helperData;
         parent::__construct($context);
     }
     /**

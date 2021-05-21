@@ -1,8 +1,9 @@
 <?php 
 $this->isRead();
 $helper = $this->helper("Lof\ChatSystem\Helper\Data");
+$current_url = $this->getCurrentChat()->getData('current_url');
 ?>
-<p><?php echo __('Chat message sent on').' '.$this->getCurrentChat()->getData('current_url');?></p>
+<p><?php echo __('Chat message sent on').' '.($current_url?('<a href="'.$current_url.'" target="_BLANK">'.$current_url.'</a>'):"");?></p>
 <input type="hidden" name="chat_id" value="<?php echo $this->getCurrentChat()->getData('chat_id');?>">
 <div class="main-chat" id="main-chat">
 </div>
