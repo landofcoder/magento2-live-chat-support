@@ -20,6 +20,9 @@
  */
 namespace Lof\ChatSystem\Model;
 
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
+
 class Blacklist extends \Magento\Framework\Model\AbstractModel
 {
     /**#@+
@@ -73,5 +76,53 @@ class Blacklist extends \Magento\Framework\Model\AbstractModel
     public function getAvailableStatuses()
     {
         return [self::STATUS_ENABLED => __('Blocked'), self::STATUS_DISABLED => __('Un Blocked')];
+    }
+
+    /**
+     * add chat info to backlist
+     * @param array $data 
+     * @return boolean
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+
+    public function addChatToBlacklist($data = array()){
+        $customer_id = isset($data["customer_id"])?$data["customer_id"]:0;
+        $email = isset($data["customer_email"])?$data["customer_email"]:"";
+        $ip = isset($data["ip"])?$data["ip"]:"";
+        $chat_id = isset($data["chat_id"])?$data["chat_id"]:0;
+        if (!$email && !$ip) {
+            $this->messageManager->addError(__('Missing email or ip. You should input one of them.'));
+            throw new CouldNotSaveException(__(
+                'Missing email or ip. You should input one of them.'
+            ));
+        }
+        $data = [
+            "customer_id" => $customer_id,
+            "email" => $email,
+            "ip" => $ip,
+            "note" => ("chat_id:".$chat_id)
+        ];
+        $collection = $this->getCollection();
+        $blacklist_exists = $collection->addFieldToFilter(['email','ip'], [$email,$ip])->getSize();
+        if ($email) {
+            $this->loadByEmail($email);
+        }
+        if ($ip && !$this->getId()) {
+            $this->loadByIp($ip);
+        }
+        if ($customer_id && !$this->getId()) {
+            $this->loadByCustomerId($customer_id);
+        }
+        if (!$this->getId()) {
+            // init model and set data
+            $this->setData($data);
+        }
+        if ($blacklist_exists && (int)$blacklist_exists > 0) {
+            throw new CouldNotSaveException(__(
+                'Error: The ip or email was added to blocklist'
+            ));
+        }
+        $this->save();
+        return true;
     }
 }

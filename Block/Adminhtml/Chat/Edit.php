@@ -56,8 +56,19 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
         $this->_controller = 'adminhtml_chat';
 
         parent::_construct();
+        $chat_id = $this->_coreRegistry->registry('lofchatsystem_chat')->getId();
         $this->buttonList->remove('save');
         $this->buttonList->remove('reset');
+        $this->buttonList->add(
+                    'blacklist',
+                    [
+                        'label' => __('Add to Blacklist'),
+                        'class' => 'save primary',
+                        'onclick' => 'setLocation(\'' . $this->getUrl('lofchatsystem/*/addBlacklist', ["chat_id"=>(int)$chat_id]) . '\')'
+                    ]
+                    
+        );
+
         //$this->buttonList->add(
                     //'close_chat',
                     //[
