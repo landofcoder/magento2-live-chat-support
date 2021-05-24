@@ -35,7 +35,7 @@ class Chat extends \Magento\Framework\View\Element\Template
     protected $_customerSession;
     /**
      *
-     * @var \Magento\Customer\Model\Url
+     * @var \Lof\ChatSystem\Model\ChatFactory
      */
     protected $chat;
      /**
@@ -48,24 +48,30 @@ class Chat extends \Magento\Framework\View\Element\Template
      * @var \Magento\Customer\Model\Url
      */
     protected $_customerUrl;
-    /**
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param array $data
-     */
+
+
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Customer\Model\Session $customerSession, 
         \Lof\ChatSystem\Helper\Url $customerUrl, 
         \Lof\ChatSystem\Helper\Data $helper,
-        \Lof\ChatSystem\Model\Chat $chat,
+        \Lof\ChatSystem\Model\ChatFactory $chatFactory,
         array $data = []
     ) {
         $this->helper = $helper;
-        $this->chat = $chat;
+        $this->chat = $chatFactory;
         $this->_customerSession  = $customerSession;
         $this->_customerUrl = $customerUrl;
         parent::__construct($context, $data);
+    }
+
+    public function _toHtml()
+	{
+		if($this->helper->getConfig("general_settings/enable")){
+            return parent::_toHtml();
+        }
+        return;
     }
 
     public function isLogin() {
@@ -77,24 +83,25 @@ class Chat extends \Magento\Framework\View\Element\Template
     public function getChatId() {
 
         if($this->isLogin()) {
-            $chat = $this->chat->getCollection()->addFieldToFilter('customer_email',$this->getCustomer()->getData('email'));
-            if(count($chat) > 0) {
+            $chat = $this->chat->create()->getCollection()->addFieldToFilter('customer_email',$this->getCustomer()->getData('email'));
+            if($chat->getSize() > 0) {
                 $chat_id = $chat->getFirstItem()->getData('chat_id');
             }else {
-                $objectManager  = \Magento\Framework\App\ObjectManager::getInstance ();
-                $chatModel      = $objectManager->create ( 'Lof\ChatSystem\Model\Chat' );
+                $chatModel      = $this->chat->create();
           
-                $chatModel->setCustomerId($this->getCustomerSession()->getCustomerId())->setCustomerName($this->getCustomer()->getData('firstname').' '.$this->getCustomer()->getData('lastname'))->setCustomerEmail($this->getCustomer()->getData('email'));
+                $chatModel
+                    ->setCustomerId($this->getCustomerSession()->getCustomerId())
+                    ->setCustomerName($this->getCustomer()->getData('firstname').' '.$this->getCustomer()->getData('lastname'))
+                    ->setCustomerEmail($this->getCustomer()->getData('email'));
                 $chatModel->save();
                 $chat_id = $chatModel->getData('chat_id');
             }
         } else {
-            $chat = $this->chat->getCollection()->addFieldToFilter('ip',$this->helper->getIp());
-            if(count($chat) > 0) {
+            $chat = $this->chat->create()->getCollection()->addFieldToFilter('ip',$this->helper->getIp());
+            if($chat->getSize() > 0) {
                 $chat_id = $chat->getFirstItem()->getData('chat_id');
             } else {
-                $objectManager  = \Magento\Framework\App\ObjectManager::getInstance ();
-                $chatModel      = $objectManager->create ( 'Lof\ChatSystem\Model\Chat' );
+                $chatModel      = $this->chat->create();
                 $chatModel->setIp($this->helper->getIp());
                 $chatModel->save();
                 $chat_id = $chatModel->getData('chat_id');
