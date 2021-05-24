@@ -31,8 +31,8 @@
 		</settings>
 		<dataProvider name="blacklist_form_data_source" class="Lof\ChatSystem\Model\Blacklist\DataProvider">
 			<settings>
-				<requestFieldName>entity_id</requestFieldName>
-				<primaryFieldName>entity_id</primaryFieldName>
+				<requestFieldName>blacklist_id</requestFieldName>
+				<primaryFieldName>blacklist_id</primaryFieldName>
 			</settings>
 		</dataProvider>
 	</dataSource>

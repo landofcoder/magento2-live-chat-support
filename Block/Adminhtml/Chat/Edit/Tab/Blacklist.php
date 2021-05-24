@@ -115,7 +115,7 @@ class Blacklist extends \Magento\Backend\Block\Widget\Form\Generic implements
             ]
         );
         $fieldset->addField(
-                'email',
+                'customer_email',
                 'text',
                 [
                     'name' => 'customer_email',
