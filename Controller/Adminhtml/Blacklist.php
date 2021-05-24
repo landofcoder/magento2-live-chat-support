@@ -51,25 +51,45 @@ abstract class Blacklist extends \Magento\Backend\App\Action
      */
     protected $collectionFactory;
 
+    protected $blacklistFactory;
+
+    protected $helper;
+
+    protected $dataPersistor;
+
+    protected $resultForwardFactory;
+
     /**
      * @param \Magento\Backend\App\Action\Context              $context             
      * @param \Magento\Framework\Registry                      $coreRegistry
      * @param PageFactory $resultPageFactory 
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
-
+     * @param \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
+     * @param \Lof\ChatSystem\Helper\Data $helperData
+     * @param \Magento\Framework\App\Request\DataPersistorInterface $dataPersistor
+     * @param \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory
+     *
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Registry $coreRegistry,
         PageFactory $resultPageFactory,
         Filter $filter, 
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory,
+        \Lof\ChatSystem\Helper\Data $helperData,
+        \Magento\Framework\App\Request\DataPersistorInterface $dataPersistor,
+        \Magento\Backend\Model\View\Result\ForwardFactory $resultForwardFactory
         ) {
         $this->_coreRegistry = $coreRegistry;
         $this->resultPageFactory = $resultPageFactory;
         $this->filter = $filter;
         $this->collectionFactory = $collectionFactory;
+        $this->blacklistFactory = $blacklistFactory;
+        $this->helper = $helperData;
+        $this->dataPersistor = $dataPersistor;
+        $this->resultForwardFactory = $resultForwardFactory;
         parent::__construct($context);
     }
     /**
