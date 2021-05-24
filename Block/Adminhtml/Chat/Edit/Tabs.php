@@ -48,12 +48,20 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
                     'content' => $this->getLayout()->createBlock('Lof\ChatSystem\Block\Adminhtml\Chat\Edit\Tab\Main')->toHtml()
                 ]
             );
-          $this->addTab(
-                'customer_information',
-                [
-                    'label' => __('Customer Information'),
-                    'content' => $this->getLayout()->createBlock('Lof\ChatSystem\Block\Adminhtml\Chat\Edit\Tab\Customer')->toHtml()
-                ]
-            );
+        $this->addTab(
+            'customer_information',
+            [
+                'label' => __('Customer Information'),
+                'content' => $this->getLayout()->createBlock('Lof\ChatSystem\Block\Adminhtml\Chat\Edit\Tab\Customer')->toHtml()
+            ]
+        );
+
+        $this->addTab(
+            'blacklist',
+            [
+                'label' => __('Blacklist'),
+                'content' => $this->getLayout()->createBlock('Lof\ChatSystem\Block\Adminhtml\Chat\Edit\Tab\Blacklist')->toHtml()
+            ]
+        );
     }
 }

@@ -25,7 +25,7 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
-class ChatActions extends Column
+class BlacklistActions extends Column
 {
     /** Url path */
     const FORM_URL_PATH_EDIT = 'lofchatsystem/blacklist/edit';
@@ -45,7 +45,6 @@ class ChatActions extends Column
     /**
      * @param ContextInterface   $context
      * @param UiComponentFactory $uiComponentFactory
-     * @param UrlBuilder         $actionUrlBuilder
      * @param UrlInterface       $urlBuilder
      * @param array              $components
      * @param array              $data
@@ -54,14 +53,12 @@ class ChatActions extends Column
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
-        UrlBuilder $actionUrlBuilder,
         UrlInterface $urlBuilder,
         array $components = [],
         array $data = [],
         $editUrl = self::FORM_URL_PATH_EDIT
     ) {
         $this->urlBuilder = $urlBuilder;
-        $this->actionUrlBuilder = $actionUrlBuilder;
         $this->editUrl = $editUrl;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }

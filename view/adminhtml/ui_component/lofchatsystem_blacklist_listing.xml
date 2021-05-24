@@ -30,24 +30,24 @@
         <item name="buttons" xsi:type="array">
             <item name="add" xsi:type="array">
                 <item name="name" xsi:type="string">add</item>
-                <item name="label" xsi:type="string" translate="true">Clear History Chat</item>
+                <item name="label" xsi:type="string" translate="true">Add New Blacklist</item>
                 <item name="class" xsi:type="string">primary</item>
-                <item name="url" xsi:type="string">*/*/clear</item>
+                <item name="url" xsi:type="string">*/*/new</item>
             </item>
-        </item> 
+        </item>
     </argument>
     <dataSource name="lofchatsystem_blacklist_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="class" xsi:type="string">ChatGridDataProvider</argument>
             <argument name="name" xsi:type="string">lofchatsystem_blacklist_listing_data_source</argument>
-            <argument name="primaryFieldName" xsi:type="string">chat_id</argument>
+            <argument name="primaryFieldName" xsi:type="string">blacklist_id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="update_url" xsi:type="url" path="mui/index/render"/>
                     <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
                     <item name="storageConfig" xsi:type="array">      
-                        <item name="indexField" xsi:type="string">chat_id</item>   
+                        <item name="indexField" xsi:type="string">blacklist_id</item>   
                     </item>
                 </item>
             </argument>
@@ -132,22 +132,9 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="selectProvider" xsi:type="string">lofchatsystem_blacklist_listing.lofchatsystem_blacklist_listing.lofchatsystem_blacklist_columns.ids</item>
-                    <item name="indexField" xsi:type="string">chat_id</item>
+                    <item name="indexField" xsi:type="string">blacklist_id</item>
                 </item>
             </argument>
-            <action name="cleanlogs">
-                <argument name="data" xsi:type="array">
-                    <item name="config" xsi:type="array">
-                        <item name="type" xsi:type="string">cleanlogs</item>
-                        <item name="label" xsi:type="string" translate="true">Clean Message Logs</item>
-                        <item name="url" xsi:type="url" path="lofchatsystem/chat/massCleanlog"/>
-                        <item name="confirm" xsi:type="array">
-                            <item name="title" xsi:type="string" translate="true">Clean Messages of items</item>
-                            <item name="message" xsi:type="string" translate="true">Are you sure you wan't to clean messages of selected items?</item>
-                        </item>
-                    </item>
-                </argument>
-            </action>
             <action name="delete">
                 <argument name="data" xsi:type="array">
                     <item name="config" xsi:type="array">
@@ -260,19 +247,21 @@
                 </item>
             </argument>
         </column>
-        <column name="created_time" class="Lof\ChatSystem\Ui\Component\Listing\Column\FormatDate">
+        <column name="created_time">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">dateRange</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/date</item>
                     <item name="dataType" xsi:type="string">date</item>
-                    <item name="label" xsi:type="string" translate="true">Created At</item>
+                    <item name="label" xsi:type="string" translate="true">Create At</item>
                 </item>
             </argument>
         </column>
-        <column name="updated_time" class="Lof\ChatSystem\Ui\Component\Listing\Column\FormatDate">
+        <column name="updated_time">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">dateRange</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/date</item>
                     <item name="dataType" xsi:type="string">date</item>
                     <item name="label" xsi:type="string" translate="true">Updated At</item>
                 </item>
