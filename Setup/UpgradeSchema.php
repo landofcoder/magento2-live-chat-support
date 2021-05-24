@@ -40,61 +40,62 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $installer = $setup;
         $installer->startSetup();
         $table = $installer->getTable('lof_chatsystem_chat');
+        if (version_compare($context->getVersion(), '1.0.3', '<')) {
+            $installer->getConnection()->addColumn(
+                $table,
+                'ip',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 255,
+                    'nullable' => true,
+                    'comment'  => 'Ip'
+                ]
+            );
 
-        $installer->getConnection()->addColumn(
-            $table,
-            'ip',
-            [
-                'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                'length'   => 255,
-                'nullable' => true,
-                'comment'  => 'Ip'
-            ]
-        );
+            $installer->getConnection()->addColumn(
+                $table,
+                'current_url',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 255,
+                    'nullable' => true,
+                    'comment'  => 'Current Url'
+                ]
+            );
 
-         $installer->getConnection()->addColumn(
-            $table,
-            'current_url',
+            $installer->getConnection()->addColumn(
+                $table,
+                'number_message',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    'length'   => 11,
+                    'nullable' => true,
+                    'comment'  => 'Number Message'
+                ]
+            );
+            $installer->getConnection()->addColumn(
+                $table,
+                'status',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'unsigned' => true,
+                    'nullable' => false,
+                    'default' => '1',
+                    'comment' => 'Status'
+                ]
+            );
+            $installer->getConnection()->addColumn(
+                $table,
+                'answered',
             [
-                'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                'length'   => 255,
-                'nullable' => true,
-                'comment'  => 'Current Url'
-            ]
-        );
-
-         $installer->getConnection()->addColumn(
-            $table,
-            'number_message',
-            [
-                'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-                'length'   => 11,
-                'nullable' => true,
-                'comment'  => 'Number Message'
-            ]
-        );
-        $installer->getConnection()->addColumn(
-            $table,
-            'status',
-             [
-                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                'unsigned' => true,
-                'nullable' => false,
-                'default' => '1',
-                'comment' => 'Status'
-            ]
-        );
-        $installer->getConnection()->addColumn(
-            $table,
-            'answered',
-           [
-                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                'unsigned' => true,
-                'nullable' => false,
-                'default' => '1',
-                'comment' => 'Answered'
-            ]
-        );
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'unsigned' => true,
+                    'nullable' => false,
+                    'default' => '1',
+                    'comment' => 'Answered'
+                ]
+            );
+        }
 
         //Update for version 1.0.4
         if (version_compare($context->getVersion(), '1.0.4', '<')) {
@@ -155,6 +156,66 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'Modification Time'
             );
             $installer->getConnection()->createTable($table);
+        }
+        //Update for version 1.0.5
+        if (version_compare($context->getVersion(), '1.0.5', '<')) {
+            $table = $installer->getTable('lof_chatsystem_chat');
+
+            $installer->getConnection()->addColumn(
+                $table,
+                'user_agent',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 255,
+                    'nullable' => true,
+                    'comment'  => 'User Agent'
+                ]
+            );
+
+            $installer->getConnection()->addColumn(
+                $table,
+                'browser',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 100,
+                    'nullable' => true,
+                    'comment'  => 'Browser Info'
+                ]
+            );
+
+            $installer->getConnection()->addColumn(
+                $table,
+                'os',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 255,
+                    'nullable' => true,
+                    'comment'  => 'Os Info'
+                ]
+            );
+
+            $installer->getConnection()->addColumn(
+                $table,
+                'country',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 50,
+                    'nullable' => true,
+                    'comment'  => 'Country Info'
+                ]
+            );
+
+            $installer->getConnection()->addColumn(
+                $table,
+                'phone_number',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 50,
+                    'nullable' => true,
+                    'comment'  => 'Phone Number Info'
+                ]
+            );
+            
         }
         $installer->endSetup();
     }
