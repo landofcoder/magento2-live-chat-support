@@ -55,6 +55,8 @@ abstract class Blacklist extends \Magento\Backend\App\Action
 
     protected $helper;
 
+    protected $dataPersistor;
+
     /**
      * @param \Magento\Backend\App\Action\Context              $context             
      * @param \Magento\Framework\Registry                      $coreRegistry
@@ -63,6 +65,7 @@ abstract class Blacklist extends \Magento\Backend\App\Action
      * @param CollectionFactory $collectionFactory
      * @param \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
      * @param \Lof\ChatSystem\Helper\Data $helperData
+     * @param \Magento\Framework\App\Request\DataPersistorInterface $dataPersistor
      *
      */
     public function __construct(
@@ -72,7 +75,8 @@ abstract class Blacklist extends \Magento\Backend\App\Action
         Filter $filter, 
         CollectionFactory $collectionFactory,
         \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory,
-        \Lof\ChatSystem\Helper\Data $helperData
+        \Lof\ChatSystem\Helper\Data $helperData,
+        \Magento\Framework\App\Request\DataPersistorInterface $dataPersistor
         ) {
         $this->_coreRegistry = $coreRegistry;
         $this->resultPageFactory = $resultPageFactory;
@@ -80,6 +84,7 @@ abstract class Blacklist extends \Magento\Backend\App\Action
         $this->collectionFactory = $collectionFactory;
         $this->blacklistFactory = $blacklistFactory;
         $this->helper = $helperData;
+        $this->dataPersistor = $dataPersistor;
         parent::__construct($context);
     }
     /**

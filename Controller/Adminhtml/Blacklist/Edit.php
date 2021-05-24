@@ -47,6 +47,7 @@ class Edit extends \Lof\ChatSystem\Controller\Adminhtml\Blacklist
             }
         }
         // 4. Register model to use later in forms
+        $this->dataPersistor->set('lofchatsystem_blacklist', $model->getData());
         $this->_coreRegistry->register('lofchatsystem_blacklist', $model);
 
         /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
