@@ -21,6 +21,7 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Store\Model\StoreManagerInterface;
+use Lof\ChatSystem\Model\ChatMessageFactory as MessageFactory;
 
 class MessageRepository implements MessageRepositoryInterface
 {
