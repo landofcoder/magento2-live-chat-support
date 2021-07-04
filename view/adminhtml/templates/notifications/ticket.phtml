@@ -2,7 +2,7 @@
 <script type="text/javascript">
 require(['jquery'],
 function($) {
-	$('.item-ticket>a').append('<span class="notifications-counter"><?php echo $this->countUnread(); ?></span>');
+	$('.item-ticket>a').append('<span class="notifications-counter"><?= $this->countUnread(); ?></span>');
 });
 </script>
 <style>
