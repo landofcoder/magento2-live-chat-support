@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Lof\ChatSystem\Model\Message;
 
-use Lof\ChatSystem\Model\ResourceModel\Message\CollectionFactory;
+use Lof\ChatSystem\Model\ResourceModel\ChatMessage\CollectionFactory;
 use Magento\Framework\App\Request\DataPersistorInterface;
 
 class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
