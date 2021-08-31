@@ -31,7 +31,7 @@
 	</head>
 	<body>
         <referenceContainer name="before.body.end">
-            <block class="Lof\ChatSystem\Block\Chat\Chat" name="chat.message"  ifconfig="lofchatsystem/chat/enable"  template="chat/chat.phtml" cacheable="false"/>
+            <block class="Lof\ChatSystem\Block\Chat\Chat" name="chat.message"  ifconfig="lofchatsystem/chat/enable"  template="chat/chat.phtml"/>
         </referenceContainer>
     </body>
 </page>
