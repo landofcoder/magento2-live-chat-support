@@ -74,41 +74,19 @@ class Chat extends \Magento\Framework\View\Element\Template
         return;
     }
 
-    public function isLogin() {
+    public function isLogin() 
+    {
         if ($this->_customerSession->isLoggedIn()) {
             return true;
         }
         return false;
     }
-    public function getChatId() {
 
-        if($this->isLogin()) {
-            $chat = $this->chat->create()->getCollection()->addFieldToFilter('customer_email',$this->getCustomer()->getData('email'));
-            if($chat->getSize() > 0) {
-                $chat_id = $chat->getFirstItem()->getData('chat_id');
-            }else {
-                $chatModel      = $this->chat->create();
-          
-                $chatModel
-                    ->setCustomerId($this->getCustomerSession()->getCustomerId())
-                    ->setCustomerName($this->getCustomer()->getData('firstname').' '.$this->getCustomer()->getData('lastname'))
-                    ->setCustomerEmail($this->getCustomer()->getData('email'));
-                $chatModel->save();
-                $chat_id = $chatModel->getData('chat_id');
-            }
-        } else {
-            $chat = $this->chat->create()->getCollection()->addFieldToFilter('ip',$this->helper->getIp());
-            if($chat->getSize() > 0) {
-                $chat_id = $chat->getFirstItem()->getData('chat_id');
-            } else {
-                $chatModel      = $this->chat->create();
-                $chatModel->setIp($this->helper->getIp());
-                $chatModel->save();
-                $chat_id = $chatModel->getData('chat_id');
-            }
-        }
-        return $chat_id;
+    public function getChatId() 
+    {
+        return $this->helper->getChatId($this->chat);
     }
+
     public function getCurrentUrl()
     {
         return $this->_urlBuilder->getCurrentUrl(); 

@@ -97,6 +97,16 @@ class Customer extends \Magento\Backend\Block\Widget\Form\Generic implements
             ['legend' => __('Customer Information'), 'class' => 'fieldset-wide', 'disabled' => $isElementDisabled]
         );
         $fieldset->addField(
+            'session_id',
+            'note',
+            [
+                'name' => 'session_id',
+                'label' => __('Chat Key'),
+                'title' => __('Chat Key'),
+                'text' => $model->getSessionId()
+            ]
+        );
+        $fieldset->addField(
             'customer_name',
             'note',
             [
@@ -115,6 +125,16 @@ class Customer extends \Magento\Backend\Block\Widget\Form\Generic implements
                 'title' => __('Customer Email'),
                 'text' => $model->getCustomerEmail() ? "<a href='" . $this->urlBuilder->getUrl('customer/index/edit',
                         ['id' => $model->getCustomerId()]) . "' target='blank' title='" . __('View Customer') . "'>" . $model->getCustomerEmail() . '</a>' : __('Guest')
+            ]
+        );
+        $fieldset->addField(
+            'ip',
+            'note',
+            [
+                'name' => 'ip',
+                'label' => __('IP Address'),
+                'title' => __('IP Address'),
+                'text' => $model->getIp()
             ]
         );
 

@@ -55,6 +55,11 @@ class ChatRepository implements ChatRepositoryInterface
     protected $sender;
 
     /**
+     * @var \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+     */
+    protected $customerRepository;
+
+    /**
      * @param ResourceChat $resource
      * @param ChatFactory $chatFactory
      * @param ChatInterfaceFactory $dataChatFactory
@@ -72,6 +77,7 @@ class ChatRepository implements ChatRepositoryInterface
      * @param \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
      * @param MessageSearchResultsInterfaceFactory $searchMessageResultsFactory
      * @param \Lof\ChatSystem\Model\Sender $sender
+     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
         ResourceChat $resource,
@@ -90,7 +96,8 @@ class ChatRepository implements ChatRepositoryInterface
         \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
         MessageSearchResultsInterfaceFactory $searchMessageResultsFactory,
-        \Lof\ChatSystem\Model\Sender $sender
+        \Lof\ChatSystem\Model\Sender $sender,
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
     ) {
         $this->resource = $resource;
         $this->chatFactory = $chatFactory;
@@ -109,6 +116,7 @@ class ChatRepository implements ChatRepositoryInterface
         $this->remoteAddress = $remoteAddress;
         $this->searchMessageResultsFactory = $searchMessageResultsFactory;
         $this->sender = $sender;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -279,7 +287,7 @@ class ChatRepository implements ChatRepositoryInterface
                             ->addFieldToFilter('status', 1)
                             ->getFirstItem();
         $searchResults = $this->searchMessageResultsFactory->create();
-        $collection = $this->messageFactory->create()->getCollection()->addFieldToFilter('customer_id',$customerId);
+        $collection = $this->messageFactory->create()->getCollection()->addFieldToFilter('customer_id', $customerId);
 
         $items = [];
         foreach ($collection as $model) {
@@ -296,6 +304,11 @@ class ChatRepository implements ChatRepositoryInterface
     }
 
     /**
+     * $message object only accept data
+     * {
+     *  body_msg,
+     *  current_url
+     * }
      * {@inheritdoc}
      */
     public function sendCustomerChatMessage($customerId, \Lof\ChatSystem\Api\Data\MessageInterface $message){
@@ -304,12 +317,12 @@ class ChatRepository implements ChatRepositoryInterface
                 'body_msg is required.'
             ));
         }
-        if(!$message->getCustomerId()) {
-            $message->setCustomerId((int)$customerId);
-        }
+        $message->setCustomerId((int)$customerId);
+        $client_ip = $this->remoteAddress->getRemoteAddress();
+        $message->setIp($client_ip);
+
         $enable_blacklist = $this->_helper->getConfig('chat/enable_blacklist');
         if ($enable_blacklist) {
-            $client_ip = $this->remoteAddress->getRemoteAddress();
             $blacklist_model = $this->blacklistFactory->create(); 
             if ($client_ip) {
                 $blacklist_model->loadByIp($client_ip);
@@ -326,19 +339,48 @@ class ChatRepository implements ChatRepositoryInterface
                 ));
             }
         }
+        //get chat id by logged in customer email
+        $messageChatId = 0;
+        $chatCollection = $this->chatFactory->create()->getCollection()
+                            ->addFieldToFilter('customer_id', (int)$customerId)
+                            ->addFieldToFilter('status', 1);
+
+        if ($chatCollection->getSize() > 0) {
+            $messageChatId = $chatCollection->getFirstItem()->getData('chat_id');
+            $chat = $this->chatFactory->create()->load((int)$messageChatId);
+        } else {
+            $chat      = $this->chatFactory->create();
+            $customer = $this->customerRepository->getById($customerId);
+            $chat
+                ->setCustomerId($customerId)
+                ->setCustomerName($customer->getFirstname(). " ". $customer->getLastname())
+                ->setCustomerEmail($customer->getEmail());
+    
+            $chat->save();
+            $messageChatId = (int)$chat->getData('chat_id');
+        }
+        // check at here
 
         $message->setIsRead(1);
         $body_msg = $message->getBodyMsg();
         $body_msg = $this->_helper->xss_clean($body_msg);
         $message->setBodyMsg($body_msg);
+        $message->setChatId((int)$messageChatId);
+        $message->setCustomerEmail($chat->getCustomerEmail());
+        $message->setCustomerName($chat->getCustomerName());
 
         $data = $message->__toArray();
+        unset($data["message_id"]);
+        unset($data["user_name"]);
+        unset($data["name"]);
+        unset($data["created_at"]);
+        unset($data["updated_at"]);
 
         $messageModel = $this->messageFactory->create();
         $messageModel
                     ->setData($data)
                     ->save();
-        $chat = $this->chatFactory->create()->load((int)$message->getChatId());
+        
         $number_message = (int)$chat->getData('number_message') + 1;
 
         $enable_auto_assign_user = $this->_helper->getConfig('system/enable_auto_assign_user');
@@ -349,17 +391,17 @@ class ChatRepository implements ChatRepositoryInterface
         }
         $chat
             ->setData('user_id', (int)$user_id)
-            ->setData('is_read',1)
-            ->setData('answered',1)
-            ->setData('status',1)
-            ->setData('number_message',$number_message)
-            ->setData('current_url',$message->getCurrentUrl())
+            ->setData('is_read', 1)
+            ->setData('answered', 1)
+            ->setData('status', 1)
+            ->setData('number_message', $number_message)
+            ->setData('current_url', $message->getCurrentUrl())
+            ->setData('session_id', $this->_helper->getSessionId())
             ->setData('ip', $message->getIp())
             ->save();
 
         if($this->_helper->getConfig('email_settings/enable_email')) {
             $chatId = $chat->getId();
-            $messageChatId = $message->getChatId();
             if(!$messageChatId || ($messageChatId != $chatId)){ //only send email at first chat
                 $data['url'] = $message->getCurrentUrl();
                 $data["user_id"] = (int)$user_id;

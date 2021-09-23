@@ -241,12 +241,21 @@
                 </item>
             </argument>
         </column>
-         <column name="ip">
+        <column name="ip">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
                     <item name="label" xsi:type="string" translate="true">Ip</item>
+                </item>
+            </argument>
+        </column>
+        <column name="session_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Chat Key</item>
                 </item>
             </argument>
         </column>

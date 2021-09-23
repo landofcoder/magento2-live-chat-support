@@ -69,12 +69,26 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $_urlInterface;
 
     protected $date;
+
+    protected $session;
+
+    protected $_sessionId = null;
+
+    protected $_current_chat_id = 0;
+
     /**
-     * @param \Magento\Framework\App\Helper\Context
-     * @param \Magento\Store\Model\StoreManagerInterface
-     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface
-     * @param \Magento\Cms\Model\Template\FilterProvider
-     * @param \Magento\Framework\Registry
+     * @param \Magento\Framework\App\Helper\Context $context
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+     * @param \Magento\Cms\Model\Template\FilterProvider $filterProvider
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Customer\Model\Url $customerUrl
+     * @param \Magento\Framework\UrlInterface $urlInterface
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Framework\Session\SessionManagerInterface $session
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -86,8 +100,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Customer\Model\Url $customerUrl,
         \Magento\Framework\UrlInterface $urlInterface,
-         \Magento\Framework\Stdlib\DateTime\DateTime $date,
-        \Magento\Framework\Registry $registry
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        \Magento\Framework\Registry $registry,
+        \Magento\Framework\Session\SessionManagerInterface $session
         ) {
         parent::__construct($context);
         $this->_storeManager = $storeManager;  
@@ -100,49 +115,127 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_customerUrl = $customerUrl;
         $this->_urlInterface = $urlInterface;
         $this->date = $date;
+        $this->session = $session;
     }
-    public function getCurrentTime() {
+
+    public function getSessionId() 
+    {
+        if (!$this->_sessionId) {
+            $this->session->start();
+            $this->_sessionId = $this->session->getSessionId();
+        }
+        return $this->_sessionId;
+    }
+
+    public function getCurrentTime() 
+    {
         return $date = $this->date->gmtDate();
     }
-    public function getUrl() {
+
+    public function getUrl() 
+    {
         return  $this->_storeManager->getStore()->getBaseUrl();
     }
-    public function getCurrentUrl() {
+
+    public function getCurrentUrl() 
+    {
        return $this->_urlInterface -> getCurrentUrl();
     }
-    public function getIp() {
+
+    public function getIp() 
+    {
         return $this->_remoteAddress->getRemoteAddress();
     }
     public function getCustomerLoginUrl() {   
         return $this->_customerUrl->getLoginUrl();
     }
 
-    public function getCustomer() {
-         $customerId = $this->customerSession->getCustomer()->getId();
-         return $customerId;
-    } 
-    public function getCustomerId() {
-         $customerId = $this->customerSession->getCustomer()->getId();
-         return $customerId;
+    public function getCustomer() 
+    {
+        $customerId = $this->customerSession->getCustomer()->getId();
+        return $customerId;
     }
-     public function getCustomerEmail() {
-         $customer = $this->customerSession->getCustomer()->getEmail();
-         return $customer;
+
+    public function getCustomerSession()
+    {
+        return $this->customerSession;
     }
-    public function getCustomerName() {
-         $customer = $this->customerSession->getCustomer()->getFirstname().' '.$this->customerSession->getCustomer()->getLastname();
-         return $customer;
+
+    public function getCustomerId() 
+    {
+        $customerId = $this->customerSession->getCustomer()->getId();
+        return $customerId;
     }
+    public function getCustomerEmail() 
+    {
+        $customer = $this->customerSession->getCustomer()->getEmail();
+        return $customer;
+    }
+
+    public function getCustomerName()
+    {
+        $customer = $this->customerSession->getCustomer()->getFirstname().' '.$this->customerSession->getCustomer()->getLastname();
+        return $customer;
+    }
+
     public function filter($str)
     {
         $html = $this->_filterProvider->getPageFilter()->filter($str);
         return $html;
     }
-     public function isLoggedIn() {
+
+    public function isLoggedIn() 
+    {
         return $this->customerSession->isLoggedIn();
     }
-    public function getCoreRegistry(){
+    public function getCoreRegistry()
+    {
         return $this->_coreRegistry;
+    }
+
+    /**
+     * Get chat ID
+     * 
+     * @param \Lof\ChatSystem\Model\ChatFactory $chatFactory
+     * @return int|null
+     */
+    public function getChatId(\Lof\ChatSystem\Model\ChatFactory $chatFactory) {
+        if (!$this->_current_chat_id) {
+            if($this->isLoggedIn()) {
+                $chat = $chatFactory->create()->getCollection()->addFieldToFilter('customer_email', $this->getCustomerEmail());
+                if($chat->getSize() > 0) {
+                    $chat_id = $chat->getFirstItem()->getData('chat_id');
+                }else {
+                    $chatModel      = $chatFactory->create();
+            
+                    $chatModel
+                        ->setCustomerId($this->getCustomerSession()->getCustomerId())
+                        ->setCustomerName($this->getCustomerName())
+                        ->setCustomerEmail($this->getCustomerEmail());
+                    $chatModel->save();
+                    $chat_id = (int)$chatModel->getData('chat_id');
+                }
+            } else {
+                $sessionId = $this->getSessionId();
+                $chat = $chatFactory->create()->getCollection();
+                if ($sessionId) {
+                    $chat->addFieldToFilter('session_id', $sessionId);
+                } else {
+                    $chat->addFieldToFilter('ip', $this->getIp());
+                }
+                if($chat->getSize() > 0) {
+                    $chat_id = $chat->getFirstItem()->getData('chat_id');
+                } else {
+                    $chatModel      = $chatFactory->create();
+                    $chatModel->setIp($this->getIp());
+                    $chatModel->setSessionId($sessionId);
+                    $chatModel->save();
+                    $chat_id = (int)$chatModel->getData('chat_id');
+                }
+            }
+            $this->_current_chat_id = (int)$chat_id;
+        }
+        return $this->_current_chat_id;
     }
      /**
      * Returns array of orders for customer

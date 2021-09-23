@@ -121,19 +121,19 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         $data['is_read'] =1;
         $data['current_time'] = $this->_helper->getCurrentTime();
         
-        if($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
+        if ($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
             $customer_id = $this->_customerSession->getCustomerId();
-            if(!isset($data["customer_id"]) || (empty($data["customer_id"]))){
+            if (!isset($data["customer_id"]) || (empty($data["customer_id"]))) {
                 $data["customer_id"] = (int)$customer_id;
             }
-            if(!isset($data["customer_email"]) || ($data["customer_email"] != $customer_email)){
+            if (!isset($data["customer_email"]) || ($data["customer_email"] != $customer_email)) {
                 $data["customer_email"] = $customer_email;
             }
-            if(!isset($data["customer_name"]) || (empty($data["customer_name"]))){
+            if (!isset($data["customer_name"]) || (empty($data["customer_name"]))) {
                 $data["customer_name"] =  $this->_customerSession->getCustomer()->getData("firstname").' '. $this->_customerSession->getCustomer()->getData("lastname");
             }
         }
-        if(empty($data['customer_name'])) {
+        if (empty($data['customer_name'])) {
             $data['customer_name'] = __('Guest');
         }
         $data = $this->_helper->xss_clean_array($data);
@@ -198,24 +198,30 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                 }
             }
         }
-        if(!empty($data) && !empty($data['body_msg'])){
+        if (!empty($data) && !empty($data['body_msg'])) {
+            
             $responseData = []; 
             $message = $this->_message;
-            try{
-                $data['chat_id'] = isset($data['chat_id'])?$data['chat_id']:null;
+            try {
+                $chat_id = $this->_helper->getChatId($this->_chatModelFactory);     
+                if ($chat_id) {
+                    $chat = $this->_chatModelFactory->create()->load((int)$chat_id);
+                } else {
+                    $chat = $this->_chatModelFactory->create()->load($this->_helper->getIp(), 'ip');
+                }
+                $data['chat_id'] = $chat->getId();
+                $number_message = $chat->getData('number_message') + 1;
                 $message
                     ->setData($data)
                     ->save();
-                $chat = $this->_chatModelFactory->create()->load($data['chat_id']);
-                $number_message = $chat->getData('number_message') + 1;
-
                 $enable_auto_assign_user = $this->_helper->getConfig('system/enable_auto_assign_user');
                 $admin_user_id = $this->_helper->getConfig('system/admin_user_id');
-                if($enable_auto_assign_user && $admin_user_id){
+                if ($enable_auto_assign_user && $admin_user_id) {
                     $data["user_id"] = (int)$admin_user_id;
-                }else {
+                } else {
                     $data["user_id"] = 0;
                 }
+
                 $chat
                     ->setData('user_id', (int)$data["user_id"])
                     ->setData('is_read',1)
@@ -224,17 +230,19 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                     ->setData('number_message',$number_message)
                     ->setData('current_url',$data['current_url'])
                     ->setData('ip', $this->_helper->getIp())
+                    ->setData('session_id', $this->_helper->getSessionId())
                     ->save();
+
                 $this->_cacheTypeList->cleanType('full_page');  
                 
-                if($this->_helper->getConfig('email_settings/enable_email')) {
+                if ($this->_helper->getConfig('email_settings/enable_email')) {
                     $chatId = $chat->getId();
-                    if(!$data['chat_id'] || ($data['chat_id'] != $chatId)){ //only send email at first chat
+                    if (!$data['chat_id'] || ($data['chat_id'] != $chatId)) { //only send email at first chat
                         $data['url'] = $data['current_url'];
                         $this->sender->sendEmailChat($data);
                     }
                 }
-            }catch(\Exception $e){
+            } catch(\Exception $e) {
                 $this->messageManager->addError(
                     __('We can\'t process your request right now. Sorry, that\'s all we know.')
                     );
