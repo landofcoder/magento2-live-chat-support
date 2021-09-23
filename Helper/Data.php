@@ -202,7 +202,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getChatId(\Lof\ChatSystem\Model\ChatFactory $chatFactory) {
         if (!$this->_current_chat_id) {
             if($this->isLoggedIn()) {
-                $chat = $chatFactory->create()->getCollection()->addFieldToFilter('customer_email',$this->getCustomer()->getData('email'));
+                $chat = $chatFactory->create()->getCollection()->addFieldToFilter('customer_email',$this->getCustomerEmail());
                 if($chat->getSize() > 0) {
                     $chat_id = $chat->getFirstItem()->getData('chat_id');
                 }else {
@@ -210,8 +210,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             
                     $chatModel
                         ->setCustomerId($this->getCustomerSession()->getCustomerId())
-                        ->setCustomerName($this->getCustomer()->getData('firstname').' '.$this->getCustomer()->getData('lastname'))
-                        ->setCustomerEmail($this->getCustomer()->getData('email'));
+                        ->setCustomerName($this->getCustomerName())
+                        ->setCustomerEmail($this->getCustomerEmail());
                     $chatModel->save();
                     $chat_id = (int)$chatModel->getData('chat_id');
                 }
