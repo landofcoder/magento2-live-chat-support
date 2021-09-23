@@ -63,7 +63,16 @@ class Msglog extends \Magento\Framework\App\Action\Action
 
     protected $_message;
 
+    /**
+     * @var \Lof\ChatSystem\Model\ChatFactory
+     */
+    protected $chatFactory;
+
+    /**
+     * @var \Lof\ChatSystem\Model\Chat
+     */
     protected $chat;
+
     protected $httpRequest;
 
     /**
@@ -74,29 +83,33 @@ class Msglog extends \Magento\Framework\App\Action\Action
     protected $blacklistFactory;
 
     /**
-     * @param Context                                             $context              
-     * @param \Magento\Store\Model\StoreManager                   $storeManager         
-     * @param \Magento\Framework\View\Result\PageFactory          $resultPageFactory    
-     * @param \Lof\ChatSystem\Helper\Data                               $helper           
-     * @param \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory 
-     * @param \Magento\Framework\Registry                         $registry             
+     * @param Context $context
+     * @param   \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param   \Lof\ChatSystem\Helper\Data $helper
+     * @param   \Lof\ChatSystem\Model\ChatMessage $message
+     * @param   \Lof\ChatSystem\Model\ChatFactory $chatFactory
+     * @param   \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory
+     * @param   \Magento\Framework\Registry $registry
+     * @param   \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
+     * @param   \Magento\Customer\Model\Session $customerSession
+     * @param   \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
+     * @param   \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory       
      */
     public function __construct(
         Context $context,
-        \Magento\Store\Model\StoreManager $storeManager,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Lof\ChatSystem\Helper\Data $helper,
         \Lof\ChatSystem\Model\ChatMessage $message,
-        \Lof\ChatSystem\Model\Chat $chat,
+        \Lof\ChatSystem\Model\ChatFactory $chatFactory,
         \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList, 
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
-        \Magento\Framework\App\Request\Http $httpRequest,
         \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
         ) {
-        $this->chat                 = $chat;
+        $this->chatFactory = $chatFactory;
+        $this->chat                 = $chatFactory->create();
         $this->resultPageFactory    = $resultPageFactory;
         $this->_helper              = $helper;
         $this->_message             = $message;
@@ -147,8 +160,13 @@ class Msglog extends \Magento\Framework\App\Action\Action
         if($this->_customerSession->getCustomer()->getEmail()) {
             $message = $this->_message->getCollection()->addFieldToFilter('customer_email',$this->_customerSession->getCustomer()->getEmail());
         } else {
-            $chat = $this->chat->load($this->_helper->getIp(),'ip');
-            $message = $this->_message->getCollection()->addFieldToFilter('chat_id',$chat->getId()); 
+            $chat_id = $this->_helper->getChatId($this->chatFactory);
+            if ($chat_id) {
+                $chat = $this->chat->load((int)$chat_id);
+            } else {
+                $chat = $this->chat->load($this->_helper->getIp(), 'ip');
+            }
+            $message = $this->_message->getCollection()->addFieldToFilter('chat_id', $chat->getId()); 
         }
         $count = count($message);
         $i=0;

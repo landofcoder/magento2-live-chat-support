@@ -326,7 +326,10 @@ class ChatRepository implements ChatRepositoryInterface
                 ));
             }
         }
-
+        //get chat id by logged in customer email
+        $messageChatId = $message->getChatId();
+        // check at here
+        
         $message->setIsRead(1);
         $body_msg = $message->getBodyMsg();
         $body_msg = $this->_helper->xss_clean($body_msg);
@@ -338,7 +341,7 @@ class ChatRepository implements ChatRepositoryInterface
         $messageModel
                     ->setData($data)
                     ->save();
-        $chat = $this->chatFactory->create()->load((int)$message->getChatId());
+        $chat = $this->chatFactory->create()->load((int)$messageChatId);
         $number_message = (int)$chat->getData('number_message') + 1;
 
         $enable_auto_assign_user = $this->_helper->getConfig('system/enable_auto_assign_user');
@@ -349,17 +352,17 @@ class ChatRepository implements ChatRepositoryInterface
         }
         $chat
             ->setData('user_id', (int)$user_id)
-            ->setData('is_read',1)
-            ->setData('answered',1)
-            ->setData('status',1)
-            ->setData('number_message',$number_message)
-            ->setData('current_url',$message->getCurrentUrl())
+            ->setData('is_read', 1)
+            ->setData('answered', 1)
+            ->setData('status', 1)
+            ->setData('number_message', $number_message)
+            ->setData('current_url', $message->getCurrentUrl())
+            ->setData('session_id', $this->_helper->getSessionId())
             ->setData('ip', $message->getIp())
             ->save();
 
         if($this->_helper->getConfig('email_settings/enable_email')) {
             $chatId = $chat->getId();
-            $messageChatId = $message->getChatId();
             if(!$messageChatId || ($messageChatId != $chatId)){ //only send email at first chat
                 $data['url'] = $message->getCurrentUrl();
                 $data["user_id"] = (int)$user_id;

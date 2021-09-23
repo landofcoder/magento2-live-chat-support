@@ -25,6 +25,7 @@ interface ChatInterface extends \Magento\Framework\Api\ExtensibleDataInterface
     const USER_ID = 'user_id';
     const UPDATED_AT = 'updated_at';
     const NUMBER_MESSAGE = 'number_message';
+    const SESSION_ID = 'session_id';
 
     /**
      * Get chat_id
@@ -235,5 +236,18 @@ interface ChatInterface extends \Magento\Framework\Api\ExtensibleDataInterface
      * @return \Lof\ChatSystem\Api\Data\ChatInterface
      */
     public function setAnswered($answered);
+
+    /**
+     * Get session_id
+     * @return string|null
+     */
+    public function getSessionId();
+
+    /**
+     * Set session_id
+     * @param string $session_id
+     * @return \Lof\ChatSystem\Api\Data\ChatInterface
+     */
+    public function setSessionId($session_id);
 }
 

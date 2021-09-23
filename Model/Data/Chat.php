@@ -316,5 +316,21 @@ class Chat extends \Magento\Framework\Api\AbstractExtensibleObject implements Ch
     {
         return $this->setData(self::ANSWERED, $answered);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSessionId()
+    {
+        return $this->_get(self::SESSION_ID);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setSessionId($session_id)
+    {
+        return $this->setData(self::SESSION_ID, $session_id);
+    }
 }
 

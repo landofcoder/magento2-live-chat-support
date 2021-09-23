@@ -217,6 +217,22 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
             
         }
+        //Update for version 1.0.6
+        if (version_compare($context->getVersion(), '1.0.6', '<')) {
+            $table = $installer->getTable('lof_chatsystem_chat');
+
+            $installer->getConnection()->addColumn(
+                $table,
+                'session_id',
+                [
+                    'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length'   => 100,
+                    'nullable' => true,
+                    'comment'  => 'Session ID'
+                ]
+            );
+
+        }
         $installer->endSetup();
     }
 }
