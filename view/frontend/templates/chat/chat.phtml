@@ -48,6 +48,7 @@ if ($store && !in_array($helper->getStoreId(), $store)) {
                             <form method="post" id="formSendMsg" onsubmit="return false;">
                                 <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($this->getFormKey()); ?>">
                                 <input type="hidden" name="chat_id" value="<?= $block->escapeHtmlAttr($this->getChatId()); ?>">
+                                <input type="hidden" name="session_id" value="<?= $block->escapeHtmlAttr(session_id());?>">
                                 <input type="hidden" name="current_url"
                                        value="<?= $block->escapeUrl($helper->getCurrentUrl()); ?>">
                                 <input type="hidden" name="customer_id"
@@ -135,6 +136,7 @@ if ($store && !in_array($helper->getStoreId(), $store)) {
                     <form method="post" id="formSendMsg" onsubmit="return false;">
                         <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($this->getFormKey()); ?>">
                         <input type="hidden" name="chat_id" value="<?= $block->escapeHtmlAttr($this->getChatId()); ?>">
+                        <input type="hidden" name="session_id" value="<?= $block->escapeHtmlAttr(session_id());?>">
                         <input type="hidden" name="current_url" value="<?= $block->escapeUrl($helper->getCurrentUrl()); ?>">
                         <input type="hidden" name="customer_id"
                                value="<?= $block->escapeHtmlAttr($this->getCustomerSession()->getCustomerId()); ?>">
@@ -177,6 +179,7 @@ if ($store && !in_array($helper->getStoreId(), $store)) {
         function sendMsg() {
             $body_msg = lofescapeHtml($('#formSendMsg input[name="body_msg"]').val());
             $chat_id = lofescapeHtml($('#formSendMsg input[name="chat_id"]').val());
+            $session_id = lofescapeHtml($('#formSendMsg input[name="session_id"]').val());
             $customer_id = lofescapeHtml($('#formSendMsg input[name="customer_id"]').val());
             $customer_name = lofescapeHtml($('#formSendMsg input[name="customer_name"]').val());
             $customer_email = lofescapeHtml($('#formSendMsg input[name="customer_email"]').val());
@@ -192,6 +195,7 @@ if ($store && !in_array($helper->getStoreId(), $store)) {
                     data: {
                         body_msg: $body_msg,
                         chat_id: $chat_id,
+                        session_id : $session_id,
                         customer_id: $customer_id,
                         customer_name: $customer_name,
                         customer_email: $customer_email,
