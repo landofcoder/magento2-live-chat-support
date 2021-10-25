@@ -1,5 +1,5 @@
 # Magento 2 Chat System module
-This module adds WebP support to Magento 2. Currently, it ships with the following features:
+This module is simple ajax live chat system for Magento 2. Currently, it ships with the following features:
 
 ## See also:
 
