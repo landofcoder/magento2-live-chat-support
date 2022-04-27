@@ -31,7 +31,7 @@
 			<resource ref="Lof_ChatSystem::chat_delete"/>
 		</resources>
 	</route>
-	
+
 	<route url="/V1/lof-chatsystem/message" method="POST">
 		<service class="Lof\ChatSystem\Api\MessageRepositoryInterface" method="save"/>
 		<resources>
@@ -68,11 +68,8 @@
     <route url="/V1/lof-chatsystem/mine/sendChatMessage" method="POST">
         <service class="Lof\ChatSystem\Api\ChatRepositoryInterface" method="sendCustomerChatMessage"/>
         <resources>
-            <resource ref="self" />
+            <resource ref="anonymous"/>
         </resources>
-		<data>
-            <parameter name="customerId" force="true">%customer_id%</parameter>
-        </data>
     </route>
 
 </routes>
