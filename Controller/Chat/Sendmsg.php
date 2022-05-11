@@ -231,7 +231,7 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                 }
                 $data["store"] = $this->storeManager->getStore()->getName();
                 $this->_eventManager->dispatch(
-                    'adminhtml_chat_new_message',
+                    'lof_chatsystem_new_message',
                     ['object' => $this, 'request' => $this->getRequest(), 'isNew' => $isNewChatThread, "data" => $data]
                 );
 
