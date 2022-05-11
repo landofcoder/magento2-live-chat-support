@@ -1,18 +1,18 @@
 <?php
 /**
  * Landofcoder
- * 
+ *
  * NOTICE OF LICENSE
- * 
+ *
  * This source file is subject to the landofcoder.com license that is
  * available through the world-wide-web at this URL:
  * http://landofcoder.com/license
- * 
+ *
  * DISCLAIMER
- * 
+ *
  * Do not edit or add to this file if you wish to upgrade this extension to newer
  * version in the future.
- * 
+ *
  * @category   Landofcoder
  * @package    Lof_ChatSystem
  * @copyright  Copyright (c) 2016 Landofcoder (http://www.landofcoder.com/)
@@ -78,6 +78,11 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
 
     protected $blacklistFactory;
 
+    /**
+     * @var \Magento\Store\Model\StoreManager
+     */
+    protected $storeManager;
+
     public function __construct(
         Context $context,
         \Magento\Store\Model\StoreManager $storeManager,
@@ -87,13 +92,13 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         \Lof\ChatSystem\Model\Sender $sender,
         \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory,
         \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList, 
+        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Magento\Customer\Model\Session $customerSession,
         \Lof\ChatSystem\Model\ChatFactory $chatModelFactory,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
         \Magento\Framework\App\Request\Http $httpRequest,
         \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
-        ) {
+    ) {
         $this->sender = $sender;
         $this->resultPageFactory    = $resultPageFactory;
         $this->_helper              = $helper;
@@ -107,6 +112,7 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
         $this->httpRequest          = $httpRequest;
         $this->remoteAddress        = $remoteAddress;
         $this->blacklistFactory     = $blacklistFactory;
+        $this->storeManager = $storeManager;
         parent::__construct($context);
     }
 
@@ -116,11 +122,11 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
      * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
-    { 
+    {
         $data = $this->_request->getPostValue();
-        $data['is_read'] =1;
+        $data['is_read'] = 1;
         $data['current_time'] = $this->_helper->getCurrentTime();
-        
+
         if ($customer_email = $this->_customerSession->getCustomer()->getEmail()) {
             $customer_id = $this->_customerSession->getCustomerId();
             if (!isset($data["customer_id"]) || (empty($data["customer_id"]))) {
@@ -199,15 +205,17 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
             }
         }
         if (!empty($data) && !empty($data['body_msg'])) {
-            
-            $responseData = []; 
+
+            $responseData = [];
             $message = $this->_message;
             try {
-                $chat_id = $this->_helper->getChatId($this->_chatModelFactory);     
+                $isNewChatThread = false;
+                $chat_id = $this->_helper->getChatId($this->_chatModelFactory);
                 if ($chat_id) {
                     $chat = $this->_chatModelFactory->create()->load((int)$chat_id);
                 } else {
                     $chat = $this->_chatModelFactory->create()->load($this->_helper->getIp(), 'ip');
+                    $isNewChatThread = true;
                 }
                 $data['chat_id'] = $chat->getId();
                 $number_message = $chat->getData('number_message') + 1;
@@ -221,6 +229,11 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                 } else {
                     $data["user_id"] = 0;
                 }
+                $data["store"] = $this->storeManager->getStore()->getName();
+                $this->_eventManager->dispatch(
+                    'adminhtml_chat_new_message',
+                    ['object' => $this, 'request' => $this->getRequest(), 'isNew' => $isNewChatThread, "data" => $data]
+                );
 
                 $chat
                     ->setData('user_id', (int)$data["user_id"])
@@ -233,8 +246,8 @@ class Sendmsg extends \Magento\Framework\App\Action\Action
                     ->setData('session_id', $this->_helper->getSessionId())
                     ->save();
 
-                $this->_cacheTypeList->cleanType('full_page');  
-                
+                $this->_cacheTypeList->cleanType('full_page');
+
                 if ($this->_helper->getConfig('email_settings/enable_email')) {
                     $chatId = $chat->getId();
                     if (!$data['chat_id'] || ($data['chat_id'] != $chatId)) { //only send email at first chat
