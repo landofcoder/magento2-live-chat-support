@@ -4,7 +4,7 @@
  */
 $helper = $this->helper("Lof\ChatSystem\Helper\Data");
 $store = $helper->getConfig('chat/store');
-$store = explode(",", $store);
+$store = explode(",", $store ?? '');
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $chat = $objectManager->create('Lof\ChatSystem\Model\Chat');
 $is_read = 0;
