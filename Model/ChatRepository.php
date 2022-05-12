@@ -22,6 +22,7 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 
 class ChatRepository implements ChatRepositoryInterface
 {
@@ -55,6 +56,11 @@ class ChatRepository implements ChatRepositoryInterface
     protected $sender;
 
     /**
+     * @var EventManager
+     */
+    protected $_eventManager;
+
+    /**
      * @var \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
      */
     protected $customerRepository;
@@ -78,6 +84,7 @@ class ChatRepository implements ChatRepositoryInterface
      * @param MessageSearchResultsInterfaceFactory $searchMessageResultsFactory
      * @param \Lof\ChatSystem\Model\Sender $sender
      * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+     * @param EventManager $eventManager
      */
     public function __construct(
         ResourceChat $resource,
@@ -97,7 +104,8 @@ class ChatRepository implements ChatRepositoryInterface
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
         MessageSearchResultsInterfaceFactory $searchMessageResultsFactory,
         \Lof\ChatSystem\Model\Sender $sender,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        EventManager $eventManager
     ) {
         $this->resource = $resource;
         $this->chatFactory = $chatFactory;
@@ -117,6 +125,7 @@ class ChatRepository implements ChatRepositoryInterface
         $this->searchMessageResultsFactory = $searchMessageResultsFactory;
         $this->sender = $sender;
         $this->customerRepository = $customerRepository;
+        $this->_eventManager = $eventManager;
     }
 
     /**
@@ -129,15 +138,15 @@ class ChatRepository implements ChatRepositoryInterface
             $storeId = $this->storeManager->getStore()->getId();
             $chat->setStoreId($storeId);
         } */
-        
+
         $chatData = $this->extensibleDataObjectConverter->toNestedArray(
             $chat,
             [],
             \Lof\ChatSystem\Api\Data\ChatInterface::class
         );
-        
+
         $chatModel = $this->chatFactory->create()->setData($chatData);
-        
+
         try {
             $this->resource->save($chatModel);
         } catch (\Exception $exception) {
@@ -169,22 +178,22 @@ class ChatRepository implements ChatRepositoryInterface
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
         $collection = $this->chatCollectionFactory->create();
-        
+
         $this->extensionAttributesJoinProcessor->process(
             $collection,
             \Lof\ChatSystem\Api\Data\ChatInterface::class
         );
-        
+
         $this->collectionProcessor->process($criteria, $collection);
-        
+
         $searchResults = $this->searchResultsFactory->create();
         $searchResults->setSearchCriteria($criteria);
-        
+
         $items = [];
         foreach ($collection as $model) {
             $items[] = $model->getDataModel();
         }
-        
+
         $searchResults->setItems($items);
         $searchResults->setTotalCount($collection->getSize());
         return $searchResults;
@@ -266,7 +275,7 @@ class ChatRepository implements ChatRepositoryInterface
         $enable_blacklist = $this->_helper->getConfig('chat/enable_blacklist');
         if ($enable_blacklist) {
             $client_ip = $this->remoteAddress->getRemoteAddress();
-            $blacklist_model = $this->blacklistFactory->create(); 
+            $blacklist_model = $this->blacklistFactory->create();
             if ($client_ip) {
                 $blacklist_model->loadByIp($client_ip);
                 if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
@@ -294,10 +303,10 @@ class ChatRepository implements ChatRepositoryInterface
             $messageModel = $model->getDataModel();
             $messageModel->setCurrentUrl($chatModel->getCurrentUrl());
             $messageModel->setIp($chatModel->getIp());
-            
+
             $items[] = $messageModel;
         }
-        
+
         $searchResults->setItems($items);
         $searchResults->setTotalCount($collection->getSize());
         return $searchResults;
@@ -323,7 +332,7 @@ class ChatRepository implements ChatRepositoryInterface
 
         $enable_blacklist = $this->_helper->getConfig('chat/enable_blacklist');
         if ($enable_blacklist) {
-            $blacklist_model = $this->blacklistFactory->create(); 
+            $blacklist_model = $this->blacklistFactory->create();
             if ($client_ip) {
                 $blacklist_model->loadByIp($client_ip);
                 if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
@@ -341,6 +350,7 @@ class ChatRepository implements ChatRepositoryInterface
         }
         //get chat id by logged in customer email
         $messageChatId = 0;
+        $isNewChatThread = false;
         $chatCollection = $this->chatFactory->create()->getCollection()
                             ->addFieldToFilter('customer_id', (int)$customerId)
                             ->addFieldToFilter('status', 1);
@@ -349,13 +359,14 @@ class ChatRepository implements ChatRepositoryInterface
             $messageChatId = $chatCollection->getFirstItem()->getData('chat_id');
             $chat = $this->chatFactory->create()->load((int)$messageChatId);
         } else {
+            $isNewChatThread = true;
             $chat      = $this->chatFactory->create();
             $customer = $this->customerRepository->getById($customerId);
             $chat
                 ->setCustomerId($customerId)
                 ->setCustomerName($customer->getFirstname(). " ". $customer->getLastname())
                 ->setCustomerEmail($customer->getEmail());
-    
+
             $chat->save();
             $messageChatId = (int)$chat->getData('chat_id');
         }
@@ -370,17 +381,24 @@ class ChatRepository implements ChatRepositoryInterface
         $message->setCustomerName($chat->getCustomerName());
 
         $data = $message->__toArray();
+
+        $this->_eventManager->dispatch(
+            'lof_chatsystem_new_message_api',
+            ['object' => $this, 'isNew' => $isNewChatThread, "data" => $data]
+        );
+
         unset($data["message_id"]);
         unset($data["user_name"]);
         unset($data["name"]);
         unset($data["created_at"]);
         unset($data["updated_at"]);
 
+
         $messageModel = $this->messageFactory->create();
         $messageModel
                     ->setData($data)
                     ->save();
-        
+
         $number_message = (int)$chat->getData('number_message') + 1;
 
         $enable_auto_assign_user = $this->_helper->getConfig('system/enable_auto_assign_user');
