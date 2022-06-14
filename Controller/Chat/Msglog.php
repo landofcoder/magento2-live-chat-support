@@ -1,18 +1,18 @@
 <?php
 /**
  * Landofcoder
- * 
+ *
  * NOTICE OF LICENSE
- * 
+ *
  * This source file is subject to the landofcoder.com license that is
  * available through the world-wide-web at this URL:
  * http://landofcoder.com/license
- * 
+ *
  * DISCLAIMER
- * 
+ *
  * Do not edit or add to this file if you wish to upgrade this extension to newer
  * version in the future.
- * 
+ *
  * @category   Landofcoder
  * @package    Lof_ChatSystem
  * @copyright  Copyright (c) 2016 Landofcoder (http://www.landofcoder.com/)
@@ -93,7 +93,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
      * @param   \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
      * @param   \Magento\Customer\Model\Session $customerSession
      * @param   \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress
-     * @param   \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory       
+     * @param   \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
      */
     public function __construct(
         Context $context,
@@ -103,7 +103,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
         \Lof\ChatSystem\Model\ChatFactory $chatFactory,
         \Magento\Framework\Controller\Result\ForwardFactory $resultForwardFactory,
         \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList, 
+        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteAddress,
         \Lof\ChatSystem\Model\BlacklistFactory $blacklistFactory
@@ -134,7 +134,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
         //check if enabled config blacklist, then check if ip in blacklist, then redirect it to home, else continue action
         if ($enable_blacklist) {
             $client_ip = $this->remoteAddress->getRemoteAddress();
-            $blacklist_model = $this->blacklistFactory->create(); 
+            $blacklist_model = $this->blacklistFactory->create();
             if ($client_ip) {
                 $blacklist_model->loadByIp($client_ip);
                 if ((0 < $blacklist_model->getId()) && $blacklist_model->getStatus()) {
@@ -166,7 +166,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
             } else {
                 $chat = $this->chat->load($this->_helper->getIp(), 'ip');
             }
-            $message = $this->_message->getCollection()->addFieldToFilter('chat_id', $chat->getId()); 
+            $message = $this->_message->getCollection()->addFieldToFilter('chat_id', $chat->getId());
         }
         $count = count($message);
         $i=0;
@@ -174,8 +174,8 @@ class Msglog extends \Magento\Framework\App\Action\Action
         $auto_message = $this->_helper->getConfig('chat/auto_message');
         $welcome_message = $this->_helper->getConfig('chat/welcome_message');
         $auto_user_name = $auto_user_name?$auto_user_name:__("Bot");
-        $auto_message = trim($auto_message);
-        $welcome_message = trim($welcome_message);
+        $auto_message = trim($auto_message ?? '');
+        $welcome_message = trim($welcome_message ?? '');
         $count_found_user_replied = 0;
         foreach ($message as $_message1) {
             if($_message1["user_id"]){
@@ -186,13 +186,13 @@ class Msglog extends \Magento\Framework\App\Action\Action
         foreach ($message as $key => $_message) {
             $i++;
             $date_sent = $_message['created_at'];
-            $day_sent = substr($date_sent, 8, 2); 
-            $month_sent = substr($date_sent, 5, 2); 
-            $year_sent = substr($date_sent, 0, 4); 
-            $hour_sent = substr($date_sent, 11, 2); 
-            $min_sent = substr($date_sent, 14, 2); 
+            $day_sent = substr($date_sent, 8, 2);
+            $month_sent = substr($date_sent, 5, 2);
+            $year_sent = substr($date_sent, 0, 4);
+            $hour_sent = substr($date_sent, 11, 2);
+            $min_sent = substr($date_sent, 14, 2);
             $body_msg = $this->_helper->xss_clean($_message['body_msg']);
-            
+
             if (!$_message['user_id'])
             {
                 print '<div class="msg-user">
@@ -203,7 +203,7 @@ class Msglog extends \Magento\Framework\App\Action\Action
                     </div> ';
 
             } else {
-      
+
                 print '<div class="msg">
                     <p>'.$body_msg.'</p>
                     <div class="info-msg">
